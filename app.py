@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, jsonify
+from pathlib import Path
+from flask import Flask, render_template, jsonify, send_from_directory
 from config import config
 from database.db import init_db
 from services.synthetic_data import seed_synthetic_data
@@ -7,7 +8,16 @@ from routes.views import views_bp
 from routes.api_routes import api_bp
 
 def create_app():
-    app = Flask(__name__)
+    root_path = Path(__file__).resolve().parent
+    static_folder = str(root_path / "static")
+    template_folder = str(root_path / "templates")
+
+    app = Flask(
+        __name__,
+        static_folder=static_folder,
+        template_folder=template_folder,
+        static_url_path="/static"
+    )
     app.config.from_object(config)
     
     # Initialize DB and pre-seed benchmark data
@@ -18,6 +28,11 @@ def create_app():
     # Register blueprints
     app.register_blueprint(views_bp)
     app.register_blueprint(api_bp)
+
+    # Explicit static route fallback for Vercel serverless environment
+    @app.route("/static/<path:filename>")
+    def serve_custom_static(filename):
+        return send_from_directory(app.static_folder, filename)
 
     # Template context processor for global variables
     @app.context_processor

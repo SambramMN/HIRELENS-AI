@@ -3,23 +3,40 @@
 {% block title %}Dashboard — HireLens AI Recruitment Intelligence{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
-  <div>
-    <h1 class="h3 fw-bold text-white mb-1">Recruitment Intelligence Overview</h1>
-    <p class="text-muted m-0" style="font-size: 0.88rem;">
-      Active Role: <span class="text-white fw-semibold">{{ active_job.title if active_job else 'No Active Job Configured' }}</span> 
-      {% if active_job %}&bull; <span class="candidate-code-tag" style="color: #34d399; border-color: rgba(16,185,129,0.3);">{{ requirements_count }} Structured Requirements</span>{% endif %}
-    </p>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="/jobs" class="btn btn-outline-glass">
-      <i data-lucide="sliders"></i>
-      Configure Job
-    </a>
-    <button class="btn btn-primary-solid" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
-      <i data-lucide="plus"></i>
-      Screen Resumes
-    </button>
+<!-- HERO BANNER (Neural Optical Intelligence) -->
+<div class="glass-card mb-4 p-0 overflow-hidden animate-in">
+  <div class="row g-0 align-items-center">
+    <div class="col-lg-8 p-4">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge-status badge-supported">Neural Optical Engine Active</span>
+        <span class="candidate-code-tag">Azentio AI v2.4</span>
+      </div>
+      <h1 class="h3 fw-bold text-white mb-2">Evidence-Based Recruitment Intelligence</h1>
+      <p class="text-secondary mb-3" style="max-width: 620px; font-size: 0.88rem; line-height: 1.5;">
+        Ground candidate qualifications in verifiable resume evidence. Multi-agent specialists extract requirements, score coverage, formulate adaptive interview guides, and audit against identity bias.
+      </p>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-primary-solid btn-sm" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+          <i data-lucide="plus"></i>
+          Screen New Resumes
+        </button>
+        <a href="/jobs" class="btn btn-outline-glass btn-sm">
+          <i data-lucide="sliders"></i>
+          Role Requirements
+        </a>
+        <a href="/comparison" class="btn btn-outline-glass btn-sm">
+          <i data-lucide="git-compare"></i>
+          Candidate Comparison
+        </a>
+        <a href="/audit" class="btn btn-outline-glass btn-sm">
+          <i data-lucide="scale"></i>
+          Fairness Audit
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-4 d-none d-lg-block text-end position-relative" style="height: 180px; overflow: hidden;">
+      <img src="/static/images/hero_lens.jpg" alt="HireLens Optical Engine" style="width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.88; mask-image: linear-gradient(to left, black 65%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 65%, transparent 100%);">
+    </div>
   </div>
 </div>
 
@@ -142,22 +159,43 @@
               {% for c in candidates %}
                 <tr>
                   <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="fw-semibold text-white" style="font-size: 0.92rem;">
-                        {% if blind_mode %}
-                          <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                    <div class="d-flex align-items-center gap-3">
+                      {% if not blind_mode %}
+                        {% if 'Sarah' in c.full_name %}
+                          <img src="/static/images/sarah.jpg" class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover; border: 1.5px solid var(--border-default);" alt="Sarah">
+                        {% elif 'Elena' in c.full_name %}
+                          <img src="/static/images/elena.jpg" class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover; border: 1.5px solid var(--border-default);" alt="Elena">
+                        {% elif 'Michael' in c.full_name %}
+                          <img src="/static/images/michael.jpg" class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover; border: 1.5px solid var(--border-default);" alt="Michael">
                         {% else %}
-                          {{ c.full_name }}
-                          <span class="candidate-code-tag ms-1">{{ c.candidate_code }}</span>
+                          <div class="rounded-circle d-flex align-items-center justify-content-center bg-dark text-white fw-bold" style="width: 38px; height: 38px; font-size: 0.82rem; border: 1.5px solid var(--border-default);">
+                            {{ c.full_name[:2]|upper }}
+                          </div>
                         {% endif %}
-                      </div>
-                    </div>
-                    <div class="text-muted" style="font-size: 0.78rem; margin-top: 3px;">
-                      {% if blind_mode %}
-                        Demographics Masked
                       {% else %}
-                        {{ c.location or 'Location not specified' }}
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.06); border: 1.5px solid var(--border-default); color: var(--text-secondary);">
+                          <i data-lucide="user-x" style="width: 18px; height: 18px;"></i>
+                        </div>
                       {% endif %}
+                      <div>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="fw-semibold text-white" style="font-size: 0.92rem;">
+                            {% if blind_mode %}
+                              <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                            {% else %}
+                              {{ c.full_name }}
+                              <span class="candidate-code-tag ms-1">{{ c.candidate_code }}</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #a1a1aa; margin-top: 2px;">
+                          {% if blind_mode %}
+                            Demographics Masked
+                          {% else %}
+                            {{ c.location or 'Location not specified' }}
+                          {% endif %}
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td>

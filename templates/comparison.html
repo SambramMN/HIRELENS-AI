@@ -31,13 +31,32 @@
             <th class="text-start" style="width: 25%;">Metric / Qualification</th>
             {% for c in candidates %}
               <th style="width: {{ (75 / candidates|length)|int }}%;">
-                <div class="fw-semibold text-white fs-6">
+                <div class="d-flex flex-column align-items-center gap-2">
                   {% if blind_mode %}
-                    <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                    <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; color: #a1a1aa;">
+                      <i data-lucide="shield-check" style="width: 20px; height: 20px; color: #10b981;"></i>
+                    </div>
                   {% else %}
-                    {{ c.full_name }}
-                    <span class="candidate-code-tag ms-1" style="font-size: 0.68rem;">{{ c.candidate_code }}</span>
+                    {% if 'sarah' in c.full_name|lower %}
+                      <img src="/static/images/sarah.jpg" alt="{{ c.full_name }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(16, 185, 129, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    {% elif 'elena' in c.full_name|lower %}
+                      <img src="/static/images/elena.jpg" alt="{{ c.full_name }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(59, 130, 246, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    {% elif 'michael' in c.full_name|lower %}
+                      <img src="/static/images/michael.jpg" alt="{{ c.full_name }}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(245, 158, 11, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    {% else %}
+                      <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2)); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: #fff;">
+                        {{ c.full_name[:2]|upper }}
+                      </div>
+                    {% endif %}
                   {% endif %}
+                  <div class="fw-semibold text-white fs-6">
+                    {% if blind_mode %}
+                      <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                    {% else %}
+                      {{ c.full_name }}
+                      <span class="candidate-code-tag ms-1" style="font-size: 0.68rem;">{{ c.candidate_code }}</span>
+                    {% endif %}
+                  </div>
                 </div>
               </th>
             {% endfor %}

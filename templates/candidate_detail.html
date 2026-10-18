@@ -5,9 +5,26 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div class="d-flex align-items-center gap-3">
-    <a href="/candidates" class="btn btn-outline-glass btn-sm">
+    <a href="/candidates" class="btn btn-outline-glass btn-sm align-self-center">
       <i data-lucide="arrow-left"></i>
     </a>
+    {% if blind_mode %}
+      <div style="width: 56px; height: 56px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; color: #a1a1aa; flex-shrink: 0;">
+        <i data-lucide="shield-check" style="width: 28px; height: 28px; color: #10b981;"></i>
+      </div>
+    {% else %}
+      {% if 'sarah' in candidate.full_name|lower %}
+        <img src="/static/images/sarah.jpg" alt="{{ candidate.full_name }}" style="width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(16, 185, 129, 0.5); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2); flex-shrink: 0;">
+      {% elif 'elena' in candidate.full_name|lower %}
+        <img src="/static/images/elena.jpg" alt="{{ candidate.full_name }}" style="width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(59, 130, 246, 0.5); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2); flex-shrink: 0;">
+      {% elif 'michael' in candidate.full_name|lower %}
+        <img src="/static/images/michael.jpg" alt="{{ candidate.full_name }}" style="width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 2px solid rgba(245, 158, 11, 0.5); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2); flex-shrink: 0;">
+      {% else %}
+        <div style="width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(59,130,246,0.25)); border: 1.5px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; color: #fff; flex-shrink: 0;">
+          {{ candidate.full_name[:2]|upper }}
+        </div>
+      {% endif %}
+    {% endif %}
     <div>
       <div class="d-flex align-items-center gap-2">
         <h1 class="h3 fw-bold text-white mb-0">

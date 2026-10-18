@@ -65,25 +65,46 @@
           {% for c in candidates %}
             <tr>
               <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="fw-semibold text-white" style="font-size: 0.92rem;">
-                    {% if blind_mode %}
-                      <span class="candidate-code-tag">{{ c.candidate_code }}</span>
-                    {% else %}
-                      {{ c.full_name }}
-                      <span class="candidate-code-tag ms-1">{{ c.candidate_code }}</span>
-                    {% endif %}
-                  </div>
-                  {% if c.is_sample %}
-                    <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.65rem;">SYNTHETIC BENCHMARK</span>
-                  {% endif %}
-                </div>
-                <div class="text-muted" style="font-size: 0.78rem; margin-top: 3px;">
+                <div class="d-flex align-items-center gap-3">
                   {% if blind_mode %}
-                    Demographic data masked for impartial review
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: #a1a1aa; flex-shrink: 0;">
+                      <i data-lucide="shield-check" style="width: 18px; height: 18px; color: #10b981;"></i>
+                    </div>
                   {% else %}
-                    {{ c.email or 'No email' }} &bull; {{ c.location or 'Location not specified' }}
+                    {% if 'sarah' in c.full_name|lower %}
+                      <img src="/static/images/sarah.jpg" alt="{{ c.full_name }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(16, 185, 129, 0.4); flex-shrink: 0;">
+                    {% elif 'elena' in c.full_name|lower %}
+                      <img src="/static/images/elena.jpg" alt="{{ c.full_name }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(59, 130, 246, 0.4); flex-shrink: 0;">
+                    {% elif 'michael' in c.full_name|lower %}
+                      <img src="/static/images/michael.jpg" alt="{{ c.full_name }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(245, 158, 11, 0.4); flex-shrink: 0;">
+                    {% else %}
+                      <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2)); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;">
+                        {{ c.full_name[:2]|upper }}
+                      </div>
+                    {% endif %}
                   {% endif %}
+                  <div>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="fw-semibold text-white" style="font-size: 0.92rem;">
+                        {% if blind_mode %}
+                          <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                        {% else %}
+                          {{ c.full_name }}
+                          <span class="candidate-code-tag ms-1">{{ c.candidate_code }}</span>
+                        {% endif %}
+                      </div>
+                      {% if c.is_sample %}
+                        <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.65rem;">SYNTHETIC BENCHMARK</span>
+                      {% endif %}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.78rem; margin-top: 3px;">
+                      {% if blind_mode %}
+                        Demographic data masked for impartial review
+                      {% else %}
+                        {{ c.email or 'No email' }} &bull; {{ c.location or 'Location not specified' }}
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
               </td>
               <td>

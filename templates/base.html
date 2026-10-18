@@ -25,6 +25,24 @@
   
   <!-- Custom Design System -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    /* Critical dark mode render defaults */
+    :root {
+      --bg-canvas: #09090b;
+      --text-primary: #f4f4f5;
+    }
+    html, body {
+      background-color: #09090b !important;
+      color: #f4f4f5 !important;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    a {
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
