@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HireLens AI — Recruitment Intelligence & Evidence-Based Hiring{% endblock %}</title>
+  <meta name="description" content="AI-Powered Recruitment Intelligence Platform — Evidence before scores, human judgment before automated decisions.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- PERSISTENT SIDEBAR -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i data-lucide="scan-eye"></i>
+        </div>
+        <div class="brand-title">HireLens<span>AI</span></div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="/dashboard" class="nav-link-custom {% if request.path in ['/', '/dashboard'] %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Overview</span>
+        </a>
+        <a href="/jobs" class="nav-link-custom {% if request.path == '/jobs' %}active{% endif %}">
+          <i data-lucide="briefcase"></i>
+          <span>Job Analysis</span>
+        </a>
+        <a href="/candidates" class="nav-link-custom {% if request.path == '/candidates' %}active{% endif %}">
+          <i data-lucide="users"></i>
+          <span>Candidate Screening</span>
+        </a>
+        <a href="/comparison" class="nav-link-custom {% if request.path == '/comparison' %}active{% endif %}">
+          <i data-lucide="git-compare"></i>
+          <span>Candidate Comparison</span>
+        </a>
+        <a href="/interview-copilot" class="nav-link-custom {% if request.path == '/interview-copilot' %}active{% endif %}">
+          <i data-lucide="message-square-code"></i>
+          <span>Interview Copilot</span>
+        </a>
+        <a href="/audit" class="nav-link-custom {% if request.path == '/audit' %}active{% endif %}">
+          <i data-lucide="scale"></i>
+          <span>Fairness & Audit</span>
+        </a>
+        <a href="/activity-log" class="nav-link-custom {% if request.path == '/activity-log' %}active{% endif %}">
+          <i data-lucide="history"></i>
+          <span>Activity Log</span>
+        </a>
+        <a href="/settings" class="nav-link-custom {% if request.path == '/settings' %}active{% endif %}">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Engine Status</span>
+          {% if openai_configured %}
+            <span class="badge bg-success" style="font-size: 0.65rem;">LLM Connected</span>
+          {% else %}
+            <span class="badge bg-secondary" style="font-size: 0.65rem;">Deterministic Mode</span>
+          {% endif %}
+        </div>
+        <p class="m-0" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">
+          Evidence Before Scores.<br>Human In The Loop.
+        </p>
+      </div>
+    </aside>
+
+    <!-- MAIN BODY -->
+    <main class="app-main">
+      <!-- TOP NAVBAR -->
+      <header class="app-header">
+        <div class="header-left">
+          <span class="badge bg-dark border border-secondary text-light px-3 py-2" style="font-size: 0.82rem;">
+            <i data-lucide="folder-check" style="width: 14px; height: 14px; vertical-align: -2px;" class="me-1 text-success"></i>
+            Azentio Talent Intelligence
+          </span>
+        </div>
+
+        <div class="header-right">
+          <!-- Blind Screening Switch -->
+          <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="blindScreeningToggle" {% if blind_mode %}checked{% endif %} style="cursor: pointer;">
+            <label class="form-check-label" for="blindScreeningToggle" style="font-size: 0.82rem; font-weight: 600; color: {% if blind_mode %}#34D399{% else %}var(--text-secondary){% endif %}; cursor: pointer;">
+              <i data-lucide="eye-off" style="width: 14px; height: 14px; vertical-align: -2px;"></i>
+              Blind Screening
+            </label>
+          </div>
+
+          <button class="btn btn-outline-glass btn-sm" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+            <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+            Upload Resumes
+          </button>
+
+          <button class="btn btn-outline-glass btn-sm" id="btnResetSystem" title="Reset demonstration data">
+            <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY -->
+      <div class="content-body">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <!-- RESUME UPLOAD MODAL -->
+  <div class="modal fade" id="uploadResumeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content modal-content-glass">
+        <div class="modal-header modal-header-glass">
+          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700;">
+            <i data-lucide="file-up" class="text-success"></i>
+            Add Candidate Resumes
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="uploadResumeForm" enctype="multipart/form-data">
+          <div class="modal-body p-4">
+            <div class="alert alert-dark border border-secondary mb-3" style="font-size: 0.85rem;">
+              <i data-lucide="shield-check" class="text-success me-1" style="width: 16px; height: 16px;"></i>
+              <strong>Privacy Assurance:</strong> Resumes are parsed locally using PyMuPDF. No text is transmitted externally unless explicitly enabled in your configuration.
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600;">Upload PDF Resumes</label>
+              <input type="file" name="resumes" class="form-control form-control-glass" accept=".pdf,.txt" multiple>
+              <div class="form-text text-muted" style="font-size: 0.78rem;">Upload one or multiple PDF / text resumes (max 16MB each).</div>
+            </div>
+
+            <div class="d-flex align-items-center my-3">
+              <hr class="flex-grow-1 border-secondary">
+              <span class="px-3 text-muted" style="font-size: 0.8rem;">OR PASTE RESUME TEXT</span>
+              <hr class="flex-grow-1 border-secondary">
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label" style="font-weight: 600;">Manual Resume Text</label>
+              <textarea name="manual_text" class="form-control form-control-glass" rows="4" placeholder="Paste raw resume text here..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer modal-footer-glass">
+            <button type="button" class="btn btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-mint">
+              <i data-lucide="sparkles"></i>
+              Extract & Match Evidence
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECRUITER DECISION MODAL -->
+  <div class="modal fade" id="recruiterDecisionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-content-glass">
+        <div class="modal-header modal-header-glass">
+          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700;">
+            <i data-lucide="check-square" class="text-success"></i>
+            Record Recruiter Decision
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="recruiterDecisionForm">
+          <input type="hidden" id="decisionCandidateId">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-muted" style="font-size: 0.85rem;">Candidate</label>
+              <div id="decisionCandidateNameModal" class="fw-bold fs-5 text-white"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600;">Decision Status</label>
+              <select id="decisionStatusSelect" class="form-select form-control-glass" required>
+                <option value="needs_review">Needs Review</option>
+                <option value="shortlisted">Shortlisted</option>
+                <option value="interview_planned">Interview Planned</option>
+                <option value="not_proceeding">Not Proceeding</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" style="font-weight: 600;">Decision Rationale (Mandatory)</label>
+              <textarea id="decisionReasonInput" class="form-control form-control-glass" rows="3" placeholder="Provide human evaluation context, trade-offs, and reasoning..." required></textarea>
+              <div class="form-text text-muted" style="font-size: 0.78rem;">Auditable explanation stored permanently with timestamp.</div>
+            </div>
+
+            <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.78rem; color: #94A3B8;">
+              <i data-lucide="info" class="text-warning me-1" style="width: 14px; height: 14px;"></i>
+              <strong>Human-in-the-Loop:</strong> AI outputs advise; human recruiters make final determinations.
+            </div>
+          </div>
+          <div class="modal-footer modal-footer-glass">
+            <button type="button" class="btn btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-mint">Save Decision</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container-custom"></div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Application Script -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  
+  {% block scripts %}{% endblock %}
+</body>
+</html>

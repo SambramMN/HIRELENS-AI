@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — HireLens AI Recruitment Intelligence{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Recruitment Intelligence Overview</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Active Role: <span class="text-white fw-semibold">{{ active_job.title if active_job else 'No Active Job Configured' }}</span> 
+      {% if active_job %}&bull; <span class="text-success">{{ requirements_count }} Structured Requirements</span>{% endif %}
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/jobs" class="btn btn-outline-glass">
+      <i data-lucide="edit-3"></i>
+      Configure Job
+    </a>
+    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+      <i data-lucide="user-plus"></i>
+      Screen Resumes
+    </button>
+  </div>
+</div>
+
+<!-- MULTI-AGENT WORKFLOW PIPELINE -->
+<div class="workflow-pipeline">
+  <div class="pipeline-step step-completed">
+    <i data-lucide="file-text"></i>
+    <div>
+      <div class="fw-bold">Job Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">Schema Validated</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="scan"></i>
+    <div>
+      <div class="fw-bold">Resume Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">PyMuPDF Extraction</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="target"></i>
+    <div>
+      <div class="fw-bold">Matching Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">Evidence Grounding</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="help-circle"></i>
+    <div>
+      <div class="fw-bold">Interview Planner</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">Adaptive Questions</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step" style="border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1);">
+    <i data-lucide="user-check" class="text-primary"></i>
+    <div>
+      <div class="fw-bold text-white">Recruiter Review</div>
+      <div style="font-size: 0.72rem; color: #93C5FD;">Final Decision</div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY METRIC CARDS -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="glass-card stat-card">
+      <div class="stat-label">Screened Candidates</div>
+      <div class="stat-value">{{ candidates|length }}</div>
+      <div class="stat-meta">Across {{ requirements_count }} verified criteria</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #3B82F6;">
+      <div class="stat-label">Average Match Score</div>
+      <div class="stat-value">{{ metrics.average_score }}%</div>
+      <div class="stat-meta">Weighted by required skills</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #F59E0B;">
+      <div class="stat-label">Unverified Gap Rate</div>
+      <div class="stat-value">{{ metrics.missing_evidence_rate }}%</div>
+      <div class="stat-meta">Requires interview verification</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #10B981;">
+      <div class="stat-label">Shortlisted Candidates</div>
+      <div class="stat-value">{{ status_map.get('shortlisted', 0) }}</div>
+      <div class="stat-meta">{{ status_map.get('interview_planned', 0) }} interview planned</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN WORKBENCH -->
+<div class="row g-4 mb-4">
+  <!-- Candidate Leaderboard -->
+  <div class="col-lg-8">
+    <div class="glass-card h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+          <i data-lucide="users" class="text-success"></i>
+          Candidate Evidence Leaderboard
+        </h2>
+        <a href="/candidates" class="text-decoration-none text-success" style="font-size: 0.85rem;">
+          View Full Table &rarr;
+        </a>
+      </div>
+
+      {% if candidates %}
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Score</th>
+                <th>Required Skills</th>
+                <th>Evidence Coverage</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in candidates %}
+                <tr>
+                  <td>
+                    <div class="fw-bold text-white">
+                      {% if blind_mode %}
+                        <span class="badge bg-secondary font-monospace">{{ c.candidate_code }}</span>
+                      {% else %}
+                        {{ c.full_name }}
+                        <span class="badge bg-dark border border-secondary text-muted font-monospace ms-1" style="font-size: 0.7rem;">{{ c.candidate_code }}</span>
+                      {% endif %}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.78rem;">
+                      {% if blind_mode %}
+                        [Demographics Masked]
+                      {% else %}
+                        {{ c.location or 'Location not stated' }}
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="score-pill {% if c.overall_score >= 80 %}score-high{% elif c.overall_score >= 60 %}score-med{% else %}score-low{% endif %}">
+                      {{ c.overall_score|int }}%
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-success" style="width: {{ c.required_skill_coverage or 0 }}%;"></div>
+                      </div>
+                      <span style="font-size: 0.8rem;" class="fw-semibold">{{ c.required_skill_coverage|int }}%</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-info" style="width: {{ c.evidence_coverage or 0 }}%;"></div>
+                      </div>
+                      <span style="font-size: 0.8rem;" class="fw-semibold">{{ c.evidence_coverage|int }}%</span>
+                    </div>
+                  </td>
+                  <td>
+                    {% if c.status == 'shortlisted' %}
+                      <span class="badge-status badge-shortlisted">Shortlisted</span>
+                    {% elif c.status == 'interview_planned' %}
+                      <span class="badge-status badge-interview-planned">Interview</span>
+                    {% elif c.status == 'not_proceeding' %}
+                      <span class="badge-status badge-not-proceeding">Rejected</span>
+                    {% else %}
+                      <span class="badge-status badge-needs-review">Needs Review</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="/candidates/{{ c.id }}" class="btn btn-outline-glass btn-sm">
+                      Inspect
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-5 text-muted">
+          <i data-lucide="inbox" style="width: 48px; height: 48px;" class="mb-2"></i>
+          <p>No candidates screened yet. Upload PDF resumes or use demonstration candidates.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recruitment Funnel & Activity -->
+  <div class="col-lg-4">
+    <div class="glass-card mb-4">
+      <h3 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i data-lucide="filter" class="text-success"></i>
+        Screening Status Distribution
+      </h3>
+      <div style="height: 200px;">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+
+    <div class="glass-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="h6 fw-bold text-white m-0 d-flex align-items-center gap-2">
+          <i data-lucide="activity" class="text-success"></i>
+          Audit Activity Stream
+        </h3>
+        <a href="/activity-log" class="text-decoration-none text-success" style="font-size: 0.8rem;">View All</a>
+      </div>
+      <div class="d-flex flex-direction-column gap-2" style="max-height: 240px; overflow-y: auto;">
+        {% for log in recent_logs %}
+          <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.8rem;">
+            <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
+              <span class="badge bg-secondary font-monospace" style="font-size: 0.65rem;">{{ log.event_type }}</span>
+              <span>{{ log.timestamp[:19] }}</span>
+            </div>
+            <div class="text-white mt-1">{{ log.description }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById('statusChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Shortlisted', 'Interview Planned', 'Needs Review', 'Not Proceeding'],
+        datasets: [{
+          data: [
+            {{ status_map.get('shortlisted', 0) }},
+            {{ status_map.get('interview_planned', 0) }},
+            {{ status_map.get('needs_review', 0) }},
+            {{ status_map.get('not_proceeding', 0) }}
+          ],
+          backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
+          borderColor: '#0F172A',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#94A3B8', boxWidth: 12, font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

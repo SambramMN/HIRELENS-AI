@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Log — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Audit Activity Log</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Tamper-evident, SQLite-backed audit trail of all recruitment decisions, uploads, and tests.
+    </p>
+  </div>
+  <button class="btn btn-outline-glass" onclick="window.location.reload()">
+    <i data-lucide="refresh-cw"></i>
+    Refresh Log
+  </button>
+</div>
+
+<!-- FILTER BAR -->
+<div class="glass-card mb-4 p-3">
+  <form method="GET" action="/activity-log" class="row g-2 align-items-center">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text bg-dark border-secondary text-muted">
+          <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+        </span>
+        <input type="text" name="q" value="{{ search }}" class="form-control form-control-glass" placeholder="Search event description or record ID...">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <select name="event" class="form-select form-control-glass">
+        <option value="">All Event Types</option>
+        {% for et in event_types %}
+          <option value="{{ et }}" {% if selected_event == et %}selected{% endif %}>{{ et }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-mint w-100">Filter</button>
+      {% if search or selected_event %}
+        <a href="/activity-log" class="btn btn-outline-glass">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- AUDIT LOG TABLE -->
+<div class="glass-card">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+      <i data-lucide="database" class="text-success"></i>
+      Event Stream ({{ logs|length }} Events)
+    </h2>
+    <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.75rem;">
+      SQLite-Backed Audit Trail
+    </span>
+  </div>
+
+  {% if logs %}
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th style="width: 18%;">Timestamp</th>
+            <th style="width: 22%;">Event Type</th>
+            <th style="width: 12%;">Record ID</th>
+            <th style="width: 48%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td class="text-muted font-monospace" style="font-size: 0.78rem;">
+                {{ log.timestamp[:19] }}
+              </td>
+              <td>
+                {% if 'DECISION' in log.event_type %}
+                  <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                {% elif 'ERROR' in log.event_type %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                {% elif 'AUDIT' in log.event_type or 'COUNTERFACTUAL' in log.event_type %}
+                  <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                {% else %}
+                  <span class="badge bg-dark border border-secondary text-muted font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if log.record_id %}
+                  <span class="badge bg-dark border border-secondary text-white font-monospace">{{ log.record_id }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td class="text-white" style="font-size: 0.88rem;">
+                {{ log.description }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-muted">
+      <i data-lucide="clipboard-list" style="width: 48px; height: 48px;" class="mb-3"></i>
+      <h3 class="h5 fw-bold text-white mb-2">No Matching Activity Found</h3>
+      <p class="text-muted">Perform recruiter actions, upload resumes, or clear your search filters.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

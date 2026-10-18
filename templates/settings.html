@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Settings & System Configuration — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">System Settings & Engine Configuration</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Environment variables, persistence diagnostics, and benchmark reset controls.
+    </p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- AI / LLM Configuration Status -->
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+          <i data-lucide="cpu" class="text-success"></i>
+          AI Specialist Engine
+        </h2>
+        {% if llm_configured %}
+          <span class="badge bg-success">LLM API CONNECTED</span>
+        {% else %}
+          <span class="badge bg-secondary">DETERMINISTIC FALLBACK ACTIVE</span>
+        {% endif %}
+      </div>
+
+      <p class="text-muted" style="font-size: 0.85rem;">
+        HireLens AI utilizes a modular multi-agent specialist architecture. When an OpenAI-compatible API key is present in <code>.env</code>, specialists call the configured model; otherwise, high-precision deterministic rules ground all evaluations without application interruption.
+      </p>
+
+      <div class="p-3 rounded bg-dark border border-secondary mb-3">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">Configured Model:</span>
+          <span class="text-white font-monospace">{{ config.OPENAI_MODEL }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">API Base URL:</span>
+          <span class="text-white font-monospace">{{ config.OPENAI_BASE_URL }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">Request Timeout:</span>
+          <span class="text-white font-monospace">{{ config.LLM_TIMEOUT_SECONDS }} seconds</span>
+        </div>
+        <div class="d-flex justify-content-between py-1" style="font-size: 0.85rem;">
+          <span class="text-muted">Active Engine Mode:</span>
+          <span class="text-success font-monospace">{% if llm_configured %}Cloud LLM Structured JSON{% else %}Local Deterministic Regex & Taxonomy{% endif %}</span>
+        </div>
+      </div>
+
+      <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.78rem; color: #94A3B8;">
+        <i data-lucide="shield-check" class="text-success me-1" style="width: 14px; height: 14px;"></i>
+        <strong>Security:</strong> API credentials are loaded solely via environment variables and are never echoed or written to client-accessible DOM nodes.
+      </div>
+    </div>
+  </div>
+
+  <!-- Persistence & Storage Diagnostics -->
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <h2 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i data-lucide="hard-drive" class="text-success"></i>
+        Persistence & File Storage
+      </h2>
+
+      <div class="p-3 rounded bg-dark border border-secondary mb-3">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">Database Engine:</span>
+          <span class="text-white font-monospace">SQLite3 (Foreign Keys Enabled)</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">Database Location:</span>
+          <span class="text-white font-monospace" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.DATABASE_PATH }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+          <span class="text-muted">PDF Upload Folder:</span>
+          <span class="text-white font-monospace" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.UPLOAD_FOLDER }}</span>
+        </div>
+        <div class="d-flex justify-content-between py-1" style="font-size: 0.85rem;">
+          <span class="text-muted">Upload Limit:</span>
+          <span class="text-white font-monospace">16 MB (PDF, TXT)</span>
+        </div>
+      </div>
+
+      <div class="p-3 rounded bg-dark border border-secondary mb-3">
+        <div class="fw-bold text-white fs-6 mb-1">Benchmark Demonstration Reset</div>
+        <p class="text-muted mb-2" style="font-size: 0.8rem;">
+          Restore the initial Software Developer role, 3 synthetic benchmark candidates (Candidate A, B, C), and evidence groundings.
+        </p>
+        <button class="btn btn-outline-glass btn-sm text-warning" id="btnResetSystem">
+          <i data-lucide="rotate-ccw"></i>
+          Reset to Benchmark Demo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

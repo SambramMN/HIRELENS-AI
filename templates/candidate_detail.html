@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Evidence Report — {{ candidate.candidate_code }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="/candidates" class="btn btn-outline-glass btn-sm">
+      <i data-lucide="arrow-left"></i>
+    </a>
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="h3 fw-bold text-white mb-0">
+          {% if blind_mode %}
+            Candidate <span class="text-success font-monospace">{{ candidate.candidate_code }}</span>
+          {% else %}
+            {{ candidate.full_name }}
+            <span class="badge bg-dark border border-secondary text-muted font-monospace fs-6">{{ candidate.candidate_code }}</span>
+          {% endif %}
+        </h1>
+        {% if candidate.status == 'shortlisted' %}
+          <span class="badge-status badge-shortlisted">Shortlisted</span>
+        {% elif candidate.status == 'interview_planned' %}
+          <span class="badge-status badge-interview-planned">Interview Planned</span>
+        {% elif candidate.status == 'not_proceeding' %}
+          <span class="badge-status badge-not-proceeding">Not Proceeding</span>
+        {% else %}
+          <span class="badge-status badge-needs-review">Needs Review</span>
+        {% endif %}
+      </div>
+      <div class="text-muted mt-1" style="font-size: 0.88rem;">
+        Role: <span class="text-white">{{ job.title if job else 'Software Engineer' }}</span> &bull; 
+        {% if blind_mode %}
+          <span class="text-info">[Contact & Personal Identifiers Masked via Blind Screening]</span>
+        {% else %}
+          <span>{{ candidate.email or 'No email' }}</span> &bull; 
+          <span>{{ candidate.phone or 'No phone' }}</span> &bull; 
+          <span>{{ candidate.location or 'Location not specified' }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="/interview-copilot?candidate_id={{ candidate.id }}" class="btn btn-outline-glass">
+      <i data-lucide="message-square-code"></i>
+      Interview Copilot
+    </a>
+    <button class="btn btn-mint" onclick="openDecisionModal({{ candidate.id }}, '{{ candidate.status }}', '{{ (candidate.candidate_code if blind_mode else candidate.full_name)|replace('\'', '\\\'') }}')">
+      <i data-lucide="check-square"></i>
+      Record Decision
+    </button>
+  </div>
+</div>
+
+<!-- SPECIALIST WORKFLOW PIPELINE STATUS -->
+<div class="workflow-pipeline">
+  <div class="pipeline-step step-completed">
+    <i data-lucide="check-circle-2" class="text-success"></i>
+    <div>
+      <div class="fw-bold">Job Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">{{ matches|length }} Requirements Grounded</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="check-circle-2" class="text-success"></i>
+    <div>
+      <div class="fw-bold">Resume Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">{{ parsed_data.get('pages_count', 1) }} Pages Processed</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="check-circle-2" class="text-success"></i>
+    <div>
+      <div class="fw-bold">Matching Analyst</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">Evidence Snippets Verified</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step step-completed">
+    <i data-lucide="check-circle-2" class="text-success"></i>
+    <div>
+      <div class="fw-bold">Interview Planner</div>
+      <div style="font-size: 0.72rem; color: #94A3B8;">{{ questions|length }} Questions Prepared</div>
+    </div>
+  </div>
+  <i data-lucide="chevron-right" class="pipeline-arrow"></i>
+  <div class="pipeline-step" style="border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1);">
+    <i data-lucide="user" class="text-primary"></i>
+    <div>
+      <div class="fw-bold text-white">Recruiter Review</div>
+      <div style="font-size: 0.72rem; color: #93C5FD;">{{ candidate.status|replace('_', ' ')|title }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE BREAKDOWN & RADAR METRICS -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="glass-card h-100">
+      <h2 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i data-lucide="gauge" class="text-success"></i>
+        Multi-Dimensional Score Breakdown
+      </h2>
+
+      <div class="d-flex align-items-center gap-4 mb-4 p-3 rounded bg-dark border border-secondary">
+        <div class="score-pill {% if scores.overall_score >= 80 %}score-high{% elif scores.overall_score >= 60 %}score-med{% else %}score-low{% endif %}" style="width: 64px; height: 64px; font-size: 1.4rem;">
+          {{ scores.overall_score|int }}%
+        </div>
+        <div>
+          <div class="fw-bold text-white fs-6">Overall Grounded Matching Score</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.4;">
+            Transparent calculation weighted by required skills (50%), evidence coverage (20%), preferred skills (20%), and profile completeness (10%), minus uncertainty penalties.
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="p-2 rounded bg-dark border border-secondary">
+            <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Required Skill Coverage</div>
+            <div class="fw-bold fs-5 text-white">{{ scores.required_skill_coverage|int }}%</div>
+            <div class="progress mt-1" style="height: 4px; background: rgba(255,255,255,0.08);">
+              <div class="progress-bar bg-success" style="width: {{ scores.required_skill_coverage or 0 }}%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-2 rounded bg-dark border border-secondary">
+            <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Evidence Coverage</div>
+            <div class="fw-bold fs-5 text-white">{{ scores.evidence_coverage|int }}%</div>
+            <div class="progress mt-1" style="height: 4px; background: rgba(255,255,255,0.08);">
+              <div class="progress-bar bg-info" style="width: {{ scores.evidence_coverage or 0 }}%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-2 rounded bg-dark border border-secondary">
+            <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Preferred Skill Coverage</div>
+            <div class="fw-bold fs-5 text-white">{{ scores.preferred_skill_coverage|int }}%</div>
+            <div class="progress mt-1" style="height: 4px; background: rgba(255,255,255,0.08);">
+              <div class="progress-bar bg-primary" style="width: {{ scores.preferred_skill_coverage or 0 }}%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-2 rounded bg-dark border border-secondary">
+            <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Verification Uncertainty</div>
+            <div class="fw-bold fs-5 text-warning">{{ scores.verification_uncertainty|int }}%</div>
+            <div class="progress mt-1" style="height: 4px; background: rgba(255,255,255,0.08);">
+              <div class="progress-bar bg-warning" style="width: {{ scores.verification_uncertainty or 0 }}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="glass-card h-100">
+      <h3 class="h6 fw-bold text-white mb-2 d-flex align-items-center gap-2">
+        <i data-lucide="radar" class="text-success"></i>
+        Competency Coverage Radar
+      </h3>
+      <div style="height: 250px;">
+        <canvas id="candidateRadarChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REQUIREMENT-BY-REQUIREMENT EVIDENCE GROUNDING -->
+<div class="glass-card mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+        <i data-lucide="file-check-2" class="text-success"></i>
+        Requirement Evidence Inspection ({{ matches|length }})
+      </h3>
+      <p class="text-muted m-0" style="font-size: 0.82rem;">
+        Every status is tied directly to actual resume sentences and verifiable sources.
+      </p>
+    </div>
+  </div>
+
+  <div class="d-flex flex-column gap-3">
+    {% for m in matches %}
+      <div class="evidence-card">
+        <div class="d-flex align-items-start justify-content-between">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="fw-bold text-white fs-6">{{ m.req_name }}</span>
+              <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.7rem;">
+                {{ m.req_category }}
+              </span>
+              {% if m.req_classification == 'required' %}
+                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace" style="font-size: 0.65rem;">REQUIRED</span>
+              {% else %}
+                <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50 font-monospace" style="font-size: 0.65rem;">PREFERRED</span>
+              {% endif %}
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem;">
+              <strong>Verification Standard:</strong> {{ m.req_criteria }}
+            </div>
+          </div>
+
+          <div class="text-end">
+            {% if m.status == 'supported' %}
+              <span class="badge-status badge-supported">Supported by Evidence</span>
+            {% elif m.status == 'partially_supported' %}
+              <span class="badge-status badge-partial">Partially Supported</span>
+            {% elif m.status == 'requires_verification' %}
+              <span class="badge-status badge-verification">Requires Verification</span>
+            {% else %}
+              <span class="badge-status badge-not-found">Not Found in Resume</span>
+            {% endif %}
+            <div class="text-muted mt-1" style="font-size: 0.72rem;">
+              Confidence: <span class="text-white fw-semibold text-uppercase">{{ m.confidence }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence snippet -->
+        <div class="evidence-snippet {% if m.status == 'not_found' %}snippet-missing{% endif %}">
+          <i data-lucide="quote" style="width: 14px; height: 14px; vertical-align: -2px;" class="me-1 text-muted"></i>
+          {{ m.evidence_snippet }}
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.8rem;">
+          <div>
+            <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: -2px;" class="me-1"></i>
+            <strong>Source Location:</strong> <span class="text-white">{{ m.source_location }}</span>
+          </div>
+          <div>
+            <span class="text-info">{{ m.explanation }}</span>
+          </div>
+        </div>
+
+        <!-- Recommended follow up question -->
+        {% if m.follow_up_question %}
+          <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between" style="font-size: 0.8rem;">
+            <div class="text-secondary">
+              <i data-lucide="help-circle" style="width: 14px; height: 14px; vertical-align: -2px;" class="text-warning me-1"></i>
+              <strong>Suggested Interview Follow-Up:</strong> "{{ m.follow_up_question }}"
+            </div>
+            <button class="btn btn-outline-glass btn-sm py-0 px-2" onclick="copyToClipboard('{{ m.follow_up_question|replace('\'', '\\\'') }}', 'Interview question copied!')">
+              <i data-lucide="copy" style="width: 12px; height: 12px;"></i>
+              Copy
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- DECISION AUDIT HISTORY -->
+<div class="glass-card">
+  <h3 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+    <i data-lucide="history" class="text-success"></i>
+    Recruiter Decisions & Audit Trail
+  </h3>
+
+  {% if decisions %}
+    <div class="d-flex flex-column gap-2">
+      {% for d in decisions %}
+        <div class="p-3 rounded bg-dark border border-secondary">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="badge-status {% if d.decision_status == 'shortlisted' %}badge-shortlisted{% elif d.decision_status == 'interview_planned' %}badge-interview-planned{% elif d.decision_status == 'not_proceeding' %}badge-not-proceeding{% else %}badge-needs-review{% endif %}">
+              {{ d.decision_status|replace('_', ' ')|title }}
+            </span>
+            <span class="text-muted" style="font-size: 0.78rem;">Recorded: {{ d.decided_at[:19] }}</span>
+          </div>
+          <div class="text-white" style="font-size: 0.88rem;">
+            <strong>Recruiter Rationale:</strong> {{ d.reason }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-muted text-center py-3" style="font-size: 0.88rem;">
+      No recruiter decisions recorded for this candidate yet. Use the "Record Decision" button to save an auditable status and rationale.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById('candidateRadarChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Required Skills', 'Evidence Coverage', 'Preferred Skills', 'Completeness', 'Certainty'],
+        datasets: [{
+          label: 'Candidate Profile',
+          data: [
+            {{ scores.required_skill_coverage or 0 }},
+            {{ scores.evidence_coverage or 0 }},
+            {{ scores.preferred_skill_coverage or 0 }},
+            {{ scores.information_completeness or 0 }},
+            {{ 100 - (scores.verification_uncertainty or 0) }}
+          ],
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderColor: '#10B981',
+          pointBackgroundColor: '#10B981',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#10B981'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            pointLabels: { color: '#94A3B8', font: { size: 10 } },
+            ticks: { display: false, min: 0, max: 100 }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

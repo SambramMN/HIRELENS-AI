@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Comparison — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Side-by-Side Candidate Comparison</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Evaluate qualifications, verification gaps, and evidence coverage side by side.
+    </p>
+  </div>
+  <a href="/candidates" class="btn btn-outline-glass">
+    <i data-lucide="users"></i>
+    Back to Screening Pool
+  </a>
+</div>
+
+{% if candidates|length >= 2 %}
+  <!-- COMPARATIVE KPI TABLE -->
+  <div class="glass-card mb-4">
+    <h2 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+      <i data-lucide="bar-chart-3" class="text-success"></i>
+      Core Multi-Dimensional Metrics
+    </h2>
+
+    <div class="table-responsive">
+      <table class="table-custom text-center">
+        <thead>
+          <tr>
+            <th class="text-start" style="width: 25%;">Metric / Qualification</th>
+            {% for c in candidates %}
+              <th style="width: {{ (75 / candidates|length)|int }}%;">
+                <div class="fw-bold fs-6 text-white">
+                  {% if blind_mode %}
+                    <span class="badge bg-secondary font-monospace">{{ c.candidate_code }}</span>
+                  {% else %}
+                    {{ c.full_name }}
+                    <span class="badge bg-dark border border-secondary text-muted font-monospace" style="font-size: 0.65rem;">{{ c.candidate_code }}</span>
+                  {% endif %}
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-start fw-semibold text-white">Overall Match Score</td>
+            {% for c in candidates %}
+              <td>
+                <div class="score-pill mx-auto {% if c.overall_score >= 80 %}score-high{% elif c.overall_score >= 60 %}score-med{% else %}score-low{% endif %}">
+                  {{ c.overall_score|int }}%
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Required Skill Coverage</td>
+            {% for c in candidates %}
+              <td>
+                <div class="fw-bold text-success fs-5">{{ c.required_skill_coverage|int }}%</div>
+                <div class="progress mt-1 mx-auto" style="height: 4px; width: 80%; background: rgba(255,255,255,0.08);">
+                  <div class="progress-bar bg-success" style="width: {{ c.required_skill_coverage or 0 }}%;"></div>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Evidence Coverage</td>
+            {% for c in candidates %}
+              <td>
+                <div class="fw-bold text-info fs-5">{{ c.evidence_coverage|int }}%</div>
+                <div class="progress mt-1 mx-auto" style="height: 4px; width: 80%; background: rgba(255,255,255,0.08);">
+                  <div class="progress-bar bg-info" style="width: {{ c.evidence_coverage or 0 }}%;"></div>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Preferred Skill Coverage</td>
+            {% for c in candidates %}
+              <td>
+                <div class="fw-bold text-white fs-5">{{ c.preferred_skill_coverage|int }}%</div>
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Verification Uncertainty</td>
+            {% for c in candidates %}
+              <td>
+                {% if c.verification_uncertainty >= 40 %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">
+                    {{ c.verification_uncertainty|int }}% High Gap
+                  </span>
+                {% elif c.verification_uncertainty >= 20 %}
+                  <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">
+                    {{ c.verification_uncertainty|int }}% Moderate
+                  </span>
+                {% else %}
+                  <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">
+                    {{ c.verification_uncertainty|int }}% Low Gap
+                  </span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Recruiter Review Status</td>
+            {% for c in candidates %}
+              <td>
+                {% if c.status == 'shortlisted' %}
+                  <span class="badge-status badge-shortlisted">Shortlisted</span>
+                {% elif c.status == 'interview_planned' %}
+                  <span class="badge-status badge-interview-planned">Interview</span>
+                {% elif c.status == 'not_proceeding' %}
+                  <span class="badge-status badge-not-proceeding">Rejected</span>
+                {% else %}
+                  <span class="badge-status badge-needs-review">Needs Review</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td class="text-start fw-semibold text-white">Action</td>
+            {% for c in candidates %}
+              <td>
+                <div class="d-flex justify-content-center gap-1">
+                  <a href="/candidates/{{ c.id }}" class="btn btn-outline-glass btn-sm">Inspect</a>
+                  <button class="btn btn-mint btn-sm" onclick="openDecisionModal({{ c.id }}, '{{ c.status }}', '{{ (c.candidate_code if blind_mode else c.full_name)|replace('\'', '\\\'') }}')">
+                    Decision
+                  </button>
+                </div>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMPARATIVE CHART -->
+  <div class="glass-card mb-4">
+    <h3 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+      <i data-lucide="bar-chart-2" class="text-success"></i>
+      Candidate Multi-Metric Comparison
+    </h3>
+    <div style="height: 280px;">
+      <canvas id="comparisonChart"></canvas>
+    </div>
+  </div>
+
+  <!-- REQUIREMENT EVIDENCE MATRIX -->
+  <div class="glass-card">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+        <i data-lucide="grid" class="text-success"></i>
+        Requirement-by-Requirement Evidence Matrix
+      </h3>
+      <span class="text-muted" style="font-size: 0.8rem;">
+        Green = Supported &bull; Amber = Partial &bull; Purple = Needs Verification &bull; Red = Not Found
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Requirement</th>
+            {% for c in candidates %}
+              <th class="text-center">
+                {% if blind_mode %}
+                  <span class="font-monospace">{{ c.candidate_code }}</span>
+                {% else %}
+                  {{ c.full_name }}
+                {% endif %}
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requirements %}
+            <tr>
+              <td>
+                <div class="fw-bold text-white">{{ r.name }}</div>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.68rem;">{{ r.category }}</span>
+                  {% if r.classification == 'required' %}
+                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace" style="font-size: 0.65rem;">REQUIRED</span>
+                  {% else %}
+                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50 font-monospace" style="font-size: 0.65rem;">PREFERRED</span>
+                  {% endif %}
+                </div>
+              </td>
+              {% for c in candidates %}
+                {% set match = match_matrix.get((c.id, r.id)) %}
+                <td class="text-center">
+                  {% if match %}
+                    {% if match.status == 'supported' %}
+                      <span class="badge-status badge-supported" title="{{ match.evidence_snippet }}">
+                        Supported
+                      </span>
+                    {% elif match.status == 'partially_supported' %}
+                      <span class="badge-status badge-partial" title="{{ match.evidence_snippet }}">
+                        Partial
+                      </span>
+                    {% elif match.status == 'requires_verification' %}
+                      <span class="badge-status badge-verification" title="{{ match.evidence_snippet }}">
+                        Verify
+                      </span>
+                    {% else %}
+                      <span class="badge-status badge-not-found" title="No direct evidence">
+                        Not Found
+                      </span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted" style="font-size: 0.8rem;">—</span>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="glass-card text-center py-5">
+    <i data-lucide="git-compare" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+    <h3 class="h5 fw-bold text-white mb-2">Need at Least 2 Candidates to Compare</h3>
+    <p class="text-muted mb-3">Upload multiple resumes or reset to the pre-loaded synthetic candidates to enable side-by-side analysis.</p>
+    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+      Upload Resumes
+    </button>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if candidates|length >= 2 %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById('comparisonChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [{% for c in candidates %}'{% if blind_mode %}{{ c.candidate_code }}{% else %}{{ c.full_name }}{% endif %}',{% endfor %}],
+        datasets: [
+          {
+            label: 'Overall Match Score (%)',
+            data: [{% for c in candidates %}{{ c.overall_score or 0 }},{% endfor %}],
+            backgroundColor: '#10B981',
+            borderRadius: 6
+          },
+          {
+            label: 'Required Skill Coverage (%)',
+            data: [{% for c in candidates %}{{ c.required_skill_coverage or 0 }},{% endfor %}],
+            backgroundColor: '#06B6D4',
+            borderRadius: 6
+          },
+          {
+            label: 'Evidence Coverage (%)',
+            data: [{% for c in candidates %}{{ c.evidence_coverage or 0 }},{% endfor %}],
+            backgroundColor: '#3B82F6',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: 'rgba(255, 255, 255, 0.06)' },
+            ticks: { color: '#94A3B8' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#CBD5E1', font: { weight: '600' } }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#94A3B8', boxWidth: 14 }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endif %}
+{% endblock %}

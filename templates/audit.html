@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Fairness & Counterfactual Audit — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Fairness & Counterfactual Audit</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Empirical diagnostics, evidence gap analysis, and controlled identity invariance tests.
+    </p>
+  </div>
+  <a href="/activity-log" class="btn btn-outline-glass">
+    <i data-lucide="history"></i>
+    View Audit Log
+  </a>
+</div>
+
+<!-- AUDIT METRICS OVERVIEW -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #10B981;">
+      <div class="stat-label">Total Screened Candidates</div>
+      <div class="stat-value">{{ metrics.total_candidates }}</div>
+      <div class="stat-meta">Active recruitment session</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #3B82F6;">
+      <div class="stat-label">Average Match Score</div>
+      <div class="stat-value">{{ metrics.average_score }}%</div>
+      <div class="stat-meta">Evidence-weighted mean</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #F59E0B;">
+      <div class="stat-label">Unverified Evidence Rate</div>
+      <div class="stat-value">{{ metrics.missing_evidence_rate }}%</div>
+      <div class="stat-meta">Requires interview confirmation</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="glass-card stat-card" style="border-left-color: #8B5CF6;">
+      <div class="stat-label">Anonymization Status</div>
+      <div class="stat-value" style="font-size: 1.3rem; padding-top: 0.35rem;">
+        {% if blind_mode %}
+          <span class="text-success">ACTIVE</span>
+        {% else %}
+          <span class="text-muted">INACTIVE</span>
+        {% endif %}
+      </div>
+      <div class="stat-meta">Blind screening toggle in navbar</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLLED COUNTERFACTUAL DIAGNOSTIC TEST (CORE FEATURE H) -->
+<div class="glass-card mb-4" style="border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(18, 27, 44, 0.85);">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <div class="badge bg-success mb-2">PROPOSED FAIRNESS INNOVATION</div>
+      <h2 class="h4 fw-bold text-white mb-1 d-flex align-items-center gap-2">
+        <i data-lucide="scale" class="text-success"></i>
+        Identity Invariance Counterfactual Diagnostic
+      </h2>
+      <p class="text-muted m-0" style="font-size: 0.88rem; max-width: 800px;">
+        Evaluates whether changing irrelevant candidate identifiers (e.g., name, gender proxy, origin) while keeping 
+        <strong>100% identical technical qualifications, project achievements, and work experience</strong> causes any score or requirement status divergence.
+      </p>
+    </div>
+    <button class="btn btn-mint" id="btnRunCounterfactual">
+      <i data-lucide="play"></i>
+      Run Counterfactual Test
+    </button>
+  </div>
+
+  <!-- Dynamic results container -->
+  <div id="counterfactualResultsContainer" style="display: none;" class="mt-4 pt-3 border-top border-secondary">
+    <div class="alert alert-dark border border-secondary mb-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Diagnostic Verdict:</span>
+          <div id="cfVerdictText" class="fs-6 mt-1"></div>
+        </div>
+        <div class="text-end">
+          <span class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Score Delta:</span>
+          <div id="cfScoreDelta" class="fs-4 fw-bold text-success font-monospace">0.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Profile A -->
+      <div class="col-md-6">
+        <div class="p-3 rounded bg-dark border border-secondary">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-secondary font-monospace">SYNTHETIC PROFILE A</span>
+            <span class="text-muted" style="font-size: 0.75rem;">Baseline Identifier</span>
+          </div>
+          <div class="fw-bold fs-5 text-white" id="cfProfileAName">Alex Morgan</div>
+          <div class="text-muted mb-2" style="font-size: 0.8rem;">Seattle, WA &bull; alex.morgan@testdomain.com</div>
+          
+          <div class="d-flex align-items-center justify-content-between p-2 rounded bg-dark border border-secondary">
+            <span class="text-muted" style="font-size: 0.85rem;">Calculated Match Score:</span>
+            <span class="fw-bold fs-5 text-success font-monospace" id="cfProfileAScore">--%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile B -->
+      <div class="col-md-6">
+        <div class="p-3 rounded bg-dark border border-secondary">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-info bg-opacity-25 text-info font-monospace">SYNTHETIC PROFILE B</span>
+            <span class="text-muted" style="font-size: 0.75rem;">Demographic Variant</span>
+          </div>
+          <div class="fw-bold fs-5 text-white" id="cfProfileBName">Priya Patel</div>
+          <div class="text-muted mb-2" style="font-size: 0.8rem;">Bengaluru, India &bull; priya.patel@testdomain.com</div>
+          
+          <div class="d-flex align-items-center justify-content-between p-2 rounded bg-dark border border-secondary">
+            <span class="text-muted" style="font-size: 0.85rem;">Calculated Match Score:</span>
+            <span class="fw-bold fs-5 text-success font-monospace" id="cfProfileBScore">--%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+      <i data-lucide="info" style="width: 14px; height: 14px; vertical-align: -2px;" class="text-info me-1"></i>
+      Both synthetic profiles share identical technical lines (Python, FastAPI, Docker, PostgreSQL, React). A delta of 0.0% confirms the matching engine is strictly grounded in evidence rather than superficial names or demographics.
+    </div>
+  </div>
+</div>
+
+<!-- GAP DIAGNOSTICS & SCORE TRANSPARENCY -->
+<div class="row g-4">
+  <!-- Frequent Verification Gaps -->
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <h3 class="h5 fw-bold text-white mb-2 d-flex align-items-center gap-2">
+        <i data-lucide="alert-circle" class="text-warning"></i>
+        Requirements with Frequent Verification Gaps
+      </h3>
+      <p class="text-muted mb-3" style="font-size: 0.82rem;">
+        Competencies where candidate resumes most frequently lack explicit documented evidence.
+      </p>
+
+      {% if metrics.frequent_gap_requirements %}
+        <div class="d-flex flex-column gap-2">
+          {% for gap in metrics.frequent_gap_requirements %}
+            <div class="p-3 rounded bg-dark border border-secondary d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold text-white">{{ gap.name }}</div>
+                <div class="text-muted" style="font-size: 0.78rem;">
+                  {{ gap.gap_count }} of {{ metrics.total_candidates }} candidates lack explicit evidence
+                </div>
+              </div>
+              <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">
+                {{ gap.gap_percentage }}% Gap Rate
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted text-center py-4">No frequent gaps detected across current candidates.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Transparent Scoring Architecture -->
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <h3 class="h5 fw-bold text-white mb-2 d-flex align-items-center gap-2">
+        <i data-lucide="check-square" class="text-success"></i>
+        Scoring Formula Transparency
+      </h3>
+      <p class="text-muted mb-3" style="font-size: 0.82rem;">
+        Scores are deterministic sums of recruiter-configured criteria. Not black-box predictions.
+      </p>
+
+      <div class="p-3 rounded bg-dark border border-secondary mb-3">
+        <div class="fw-bold text-success font-monospace mb-1" style="font-size: 0.88rem;">
+          Overall Score = (Required × 50%) + (Evidence × 20%) + (Preferred × 20%) + (Completeness × 10%) - (Uncertainty × 5%)
+        </div>
+        <div class="text-muted" style="font-size: 0.8rem;">
+          Clamped within [0, 100]. Every component is individually inspectable in the candidate detail view.
+        </div>
+      </div>
+
+      <div class="d-flex flex-column gap-2" style="font-size: 0.82rem;">
+        <div class="d-flex justify-content-between border-bottom border-secondary pb-1">
+          <span class="text-white">Required Skills Weight:</span>
+          <span class="text-success fw-bold">50%</span>
+        </div>
+        <div class="d-flex justify-content-between border-bottom border-secondary pb-1">
+          <span class="text-white">Evidence Coverage Weight:</span>
+          <span class="text-info fw-bold">20%</span>
+        </div>
+        <div class="d-flex justify-content-between border-bottom border-secondary pb-1">
+          <span class="text-white">Preferred Skills Weight:</span>
+          <span class="text-primary fw-bold">20%</span>
+        </div>
+        <div class="d-flex justify-content-between border-bottom border-secondary pb-1">
+          <span class="text-white">Profile Completeness:</span>
+          <span class="text-white fw-bold">10%</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Uncertainty Penalty:</span>
+          <span class="text-warning fw-bold">-5% max</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

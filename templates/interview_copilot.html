@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Adaptive Interview Copilot — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Adaptive Interview Copilot</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Candidate-specific interview questions grounded in verified evidence and requirement gaps.
+    </p>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <!-- Candidate switcher dropdown -->
+    <div class="d-flex align-items-center gap-2">
+      <label class="text-muted" style="font-size: 0.85rem;">Candidate:</label>
+      <select class="form-select form-control-glass py-1" style="width: 220px;" onchange="window.location.href='/interview-copilot?candidate_id=' + this.value">
+        {% for c in candidates %}
+          <option value="{{ c.id }}" {% if selected_candidate and selected_candidate.id == c.id %}selected{% endif %}>
+            {% if blind_mode %}{{ c.candidate_code }}{% else %}{{ c.full_name }} ({{ c.candidate_code }}){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% if selected_candidate %}
+      <button class="btn btn-mint" onclick="regenerateQuestions({{ selected_candidate.id }})">
+        <i data-lucide="sparkles"></i>
+        Regenerate Questions
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+{% if selected_candidate %}
+  <!-- CANDIDATE BANNER -->
+  <div class="glass-card mb-4 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="brand-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3);">
+        <i data-lucide="user-check"></i>
+      </div>
+      <div>
+        <h2 class="h5 fw-bold text-white mb-0">
+          Interview Guide for 
+          {% if blind_mode %}
+            <span class="text-success font-monospace">{{ selected_candidate.candidate_code }}</span>
+          {% else %}
+            {{ selected_candidate.full_name }}
+            <span class="badge bg-dark border border-secondary text-muted font-monospace ms-1">{{ selected_candidate.candidate_code }}</span>
+          {% endif %}
+        </h2>
+        <div class="text-muted" style="font-size: 0.82rem;">
+          Specialist: Interview Planner &bull; Objective: Evidence clarification and technical depth verification
+        </div>
+      </div>
+    </div>
+    <span class="badge bg-dark border border-secondary text-muted">
+      {{ questions|length }} Tailored Questions
+    </span>
+  </div>
+
+  <!-- ETHICAL COMPLIANCE ALERT -->
+  <div class="alert alert-dark border border-secondary mb-4 d-flex align-items-center gap-3" style="font-size: 0.85rem;">
+    <i data-lucide="shield-check" class="text-success fs-5"></i>
+    <div>
+      <strong class="text-white">Fairness & Bias Guardrails Active:</strong> Questions strictly evaluate job-relevant technical competencies, system architecture, and evidence clarification. Prompts regarding protected characteristics, age, family status, religion, caste, health, or personal background are strictly suppressed.
+    </div>
+  </div>
+
+  <!-- QUESTIONS LIST -->
+  {% if questions %}
+    <div class="d-flex flex-column gap-3">
+      {% for q in questions %}
+        <div class="glass-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.75rem;">
+                {{ q.category }}
+              </span>
+              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.75rem;">
+                {{ q.competency }}
+              </span>
+            </div>
+            <button class="btn btn-outline-glass btn-sm" onclick="copyToClipboard('Competency: {{ q.competency|replace('\'', '\\\'') }}\nQuestion: {{ q.question|replace('\'', '\\\'') }}\nStrong Answer Rubric:\n{{ q.evaluation_rubric|replace('\'', '\\\'') }}', 'Interview question & rubric copied!')">
+              <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+              Copy Question & Rubric
+            </button>
+          </div>
+
+          <h3 class="h5 fw-bold text-white mb-2" style="line-height: 1.4;">
+            "{{ q.question }}"
+          </h3>
+
+          <div class="p-3 rounded bg-dark border border-secondary mb-3" style="font-size: 0.85rem;">
+            <div class="mb-1 text-muted">
+              <i data-lucide="target" style="width: 14px; height: 14px; vertical-align: -2px;" class="text-success me-1"></i>
+              <strong>Why Relevant:</strong> <span class="text-white">{{ q.why_relevant }}</span>
+            </div>
+            <div class="text-muted">
+              <i data-lucide="check-circle" style="width: 14px; height: 14px; vertical-align: -2px;" class="text-info me-1"></i>
+              <strong>Strong Answer Criteria:</strong> <span class="text-white">{{ q.strong_answer_criteria }}</span>
+            </div>
+          </div>
+
+          {% if q.evaluation_rubric %}
+            <div>
+              <div class="text-muted mb-1" style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
+                Structured Evaluation Rubric (1 - 5 Scale)
+              </div>
+              <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.82rem; color: #CBD5E1; white-space: pre-line;">
+                {{ q.evaluation_rubric }}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass-card text-center py-5">
+      <i data-lucide="help-circle" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+      <h3 class="h5 fw-bold text-white mb-2">No Interview Questions Generated Yet</h3>
+      <p class="text-muted mb-3">Click below to generate grounded interview questions for this candidate.</p>
+      <button class="btn btn-mint" onclick="regenerateQuestions({{ selected_candidate.id }})">
+        Generate Questions
+      </button>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="glass-card text-center py-5">
+    <i data-lucide="users" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+    <h3 class="h5 fw-bold text-white mb-2">No Candidates Screened</h3>
+    <p class="text-muted mb-3">Upload a candidate resume to generate structured interview guides.</p>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function regenerateQuestions(candidateId) {
+  try {
+    window.showToast("Formulating candidate-specific interview plan...", "success");
+    const res = await fetch(`/api/candidates/${candidateId}/interview-questions`, {
+      method: "POST"
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.showToast(`Prepared ${data.count} structured interview questions!`);
+      setTimeout(() => window.location.reload(), 500);
+    } else {
+      window.showToast(data.error || "Failed to generate questions", "error");
+    }
+  } catch (err) {
+    window.showToast("Connection error generating questions", "error");
+  }
+}
+</script>
+{% endblock %}

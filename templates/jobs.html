@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Job Intelligence — HireLens AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="h3 fw-bold text-white mb-1">Job Description Intelligence</h1>
+    <p class="text-muted m-0" style="font-size: 0.9rem;">
+      Analyzed and structured requirements powered by the Job Analyst specialist.
+    </p>
+  </div>
+  <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#createJobModal">
+    <i data-lucide="plus-circle"></i>
+    New Job Description
+  </button>
+</div>
+
+{% if active_job %}
+  <div class="glass-card mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <span class="badge bg-success mb-2">ACTIVE VACANCY</span>
+        <h2 class="h4 fw-bold text-white mb-1">{{ active_job.title }}</h2>
+        <div class="text-muted" style="font-size: 0.88rem;">
+          <i data-lucide="building" style="width: 14px; height: 14px; vertical-align: -2px;"></i>
+          Department: <span class="text-white">{{ active_job.department or 'Engineering' }}</span> &bull; 
+          <i data-lucide="clock" style="width: 14px; height: 14px; vertical-align: -2px;"></i>
+          Experience: <span class="text-white">{{ active_job.experience_level or 'Not Specified' }}</span>
+        </div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-dark border border-secondary text-muted">
+          Created: {{ active_job.created_at[:10] }}
+        </span>
+      </div>
+    </div>
+
+    <div class="p-3 rounded bg-dark border border-secondary mb-2" style="font-size: 0.85rem; color: #CBD5E1; max-height: 120px; overflow-y: auto; white-space: pre-line;">
+      {{ active_job.description_raw }}
+    </div>
+  </div>
+
+  <!-- REQUIREMENTS BREAKDOWN -->
+  <div class="glass-card">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
+        <i data-lucide="check-circle-2" class="text-success"></i>
+        Structured Hiring Requirements ({{ requirements|length }})
+      </h3>
+      <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.75rem;">
+        Recruiter-Auditable Weights
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Category</th>
+            <th>Classification</th>
+            <th>Weight</th>
+            <th>Verification Criteria</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requirements %}
+            <tr>
+              <td class="fw-bold text-white">{{ r.name }}</td>
+              <td>
+                <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.75rem;">
+                  {{ r.category }}
+                </span>
+              </td>
+              <td>
+                {% if r.classification == 'required' %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace">REQUIRED</span>
+                {% else %}
+                  <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50 font-monospace">PREFERRED</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-1">
+                  {% for w in range(r.weight) %}
+                    <span style="color: #10B981; font-size: 1.1rem;">★</span>
+                  {% endfor %}
+                  {% for w in range(5 - r.weight) %}
+                    <span style="color: #334155; font-size: 1.1rem;">★</span>
+                  {% endfor %}
+                  <span class="ms-1 text-muted" style="font-size: 0.8rem;">({{ r.weight }}/5)</span>
+                </div>
+              </td>
+              <td style="font-size: 0.85rem; color: #CBD5E1; max-width: 320px;">
+                {{ r.verification_criteria }}
+              </td>
+              <td>
+                <button class="btn btn-outline-glass btn-sm" onclick="openRequirementEditModal({{ r.id }}, '{{ r.name|replace('\'', '\\\'') }}', {{ r.weight }}, '{{ r.classification }}', '{{ r.verification_criteria|replace('\'', '\\\'') }}')">
+                  <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
+                  Edit
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="glass-card text-center py-5">
+    <i data-lucide="briefcase" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+    <h3 class="h5 fw-bold text-white mb-2">No Job Descriptions Created</h3>
+    <p class="text-muted mb-3">Create your first job description to extract structured requirements.</p>
+    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#createJobModal">
+      Create Job
+    </button>
+  </div>
+{% endif %}
+
+<!-- CREATE JOB MODAL -->
+<div class="modal fade" id="createJobModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content modal-content-glass">
+      <div class="modal-header modal-header-glass">
+        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+          <i data-lucide="plus-circle" class="text-success"></i>
+          Create & Structure Job Description
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="createJobForm">
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Job Title *</label>
+              <input type="text" id="jobTitleInput" class="form-control form-control-glass" placeholder="e.g. Senior Full Stack Engineer" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Department</label>
+              <input type="text" id="jobDeptInput" class="form-control form-control-glass" placeholder="e.g. Engineering">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Experience Level</label>
+              <input type="text" id="jobExpInput" class="form-control form-control-glass" placeholder="e.g. 4+ years">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Required Skills (Comma or newline separated)</label>
+            <input type="text" id="jobRequiredSkillsInput" class="form-control form-control-glass" placeholder="Python, FastAPI, React, PostgreSQL, Docker">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Preferred Skills (Bonus qualifications)</label>
+            <input type="text" id="jobPreferredSkillsInput" class="form-control form-control-glass" placeholder="Kubernetes, Redis, AWS, CI/CD">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Key Responsibilities</label>
+            <textarea id="jobResponsibilitiesInput" class="form-control form-control-glass" rows="2" placeholder="Describe core day-to-day duties..."></textarea>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-semibold">Full Job Description (Optional context)</label>
+            <textarea id="jobDescInput" class="form-control form-control-glass" rows="4" placeholder="Paste full JD text here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer modal-footer-glass">
+          <button type="button" class="btn btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-mint">
+            <i data-lucide="sparkles"></i>
+            Extract & Structure Requirements
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT REQUIREMENT MODAL -->
+<div class="modal fade" id="editRequirementModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-glass">
+      <div class="modal-header modal-header-glass">
+        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
+          <i data-lucide="sliders" class="text-success"></i>
+          Edit Requirement Configuration
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <input type="hidden" id="editReqId">
+        <div class="mb-3">
+          <label class="form-label text-muted" style="font-size: 0.85rem;">Requirement Name</label>
+          <div id="editReqName" class="fw-bold text-white fs-5"></div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Classification</label>
+            <select id="editReqClass" class="form-select form-control-glass">
+              <option value="required">Required</option>
+              <option value="preferred">Preferred</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Importance Weight (1-5)</label>
+            <select id="editReqWeight" class="form-select form-control-glass">
+              <option value="5">5 - Critical Priority</option>
+              <option value="4">4 - High Importance</option>
+              <option value="3">3 - Medium Standard</option>
+              <option value="2">2 - Low / Secondary</option>
+              <option value="1">1 - Nice to Have</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Verification Criteria</label>
+          <textarea id="editReqCriteria" class="form-control form-control-glass" rows="3"></textarea>
+          <div class="form-text text-muted" style="font-size: 0.78rem;">
+            Concrete standard used by the Matching Analyst to inspect resume evidence.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer modal-footer-glass">
+        <button type="button" class="btn btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-mint" onclick="saveRequirementEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
