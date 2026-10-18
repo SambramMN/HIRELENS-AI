@@ -6,10 +6,10 @@
   <title>{% block title %}HireLens AI — Recruitment Intelligence & Evidence-Based Hiring{% endblock %}</title>
   <meta name="description" content="AI-Powered Recruitment Intelligence Platform — Evidence before scores, human judgment before automated decisions.">
   
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,13 +20,16 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
+  <!-- Lenis Smooth Scroll -->
+  <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
+  
   <!-- Custom Design System -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
   <div class="app-container">
-    <!-- PERSISTENT SIDEBAR -->
+    <!-- PERSISTENT SIDEBAR (21st.dev Style) -->
     <aside class="app-sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
@@ -72,15 +75,19 @@
 
       <div class="sidebar-footer">
         <div class="d-flex align-items-center justify-content-between mb-2">
-          <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Engine Status</span>
-          {% if openai_configured %}
-            <span class="badge bg-success" style="font-size: 0.65rem;">LLM Connected</span>
-          {% else %}
-            <span class="badge bg-secondary" style="font-size: 0.65rem;">Deterministic Mode</span>
-          {% endif %}
+          <div class="live-indicator">
+            <span class="pulse-dot">
+              <span class="pulse-ring"></span>
+              <span class="pulse-core"></span>
+            </span>
+            <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+              {% if openai_configured %}LLM ACTIVE{% else %}DETERMINISTIC{% endif %}
+            </span>
+          </div>
+          <span class="badge bg-dark border border-secondary text-muted font-monospace" style="font-size: 0.65rem;">v2.4</span>
         </div>
-        <p class="m-0" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">
-          Evidence Before Scores.<br>Human In The Loop.
+        <p class="m-0" style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+          Evidence Before Scores &bull; Human Judgment Final
         </p>
       </div>
     </aside>
@@ -90,10 +97,11 @@
       <!-- TOP NAVBAR -->
       <header class="app-header">
         <div class="header-left">
-          <span class="badge bg-dark border border-secondary text-light px-3 py-2" style="font-size: 0.82rem;">
-            <i data-lucide="folder-check" style="width: 14px; height: 14px; vertical-align: -2px;" class="me-1 text-success"></i>
-            Azentio Talent Intelligence
-          </span>
+          <div class="d-flex align-items-center gap-2 px-3 py-1 rounded" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); font-size: 0.8rem;">
+            <i data-lucide="folder-check" style="width: 14px; height: 14px; color: #10b981;"></i>
+            <span class="text-white fw-semibold">Azentio Talent Intelligence</span>
+            <span class="text-muted">&bull; Production Active</span>
+          </div>
         </div>
 
         <div class="header-right">
@@ -106,8 +114,8 @@
             </label>
           </div>
 
-          <button class="btn btn-outline-glass btn-sm" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
-            <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+          <button class="btn btn-shimmer btn-sm" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+            <i data-lucide="upload-cloud" style="width: 15px; height: 15px;"></i>
             Upload Resumes
           </button>
 
@@ -129,33 +137,38 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content modal-content-glass">
         <div class="modal-header modal-header-glass">
-          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700;">
-            <i data-lucide="file-up" class="text-success"></i>
+          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700; font-size: 1.05rem;">
+            <i data-lucide="file-up" style="color: #10b981; width: 20px; height: 20px;"></i>
             Add Candidate Resumes
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <form id="uploadResumeForm" enctype="multipart/form-data">
           <div class="modal-body p-4">
-            <div class="alert alert-dark border border-secondary mb-3" style="font-size: 0.85rem;">
-              <i data-lucide="shield-check" class="text-success me-1" style="width: 16px; height: 16px;"></i>
-              <strong>Privacy Assurance:</strong> Resumes are parsed locally using PyMuPDF. No text is transmitted externally unless explicitly enabled in your configuration.
+            <div class="p-3 rounded mb-3" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.84rem;">
+              <div class="d-flex align-items-center gap-2 text-white fw-semibold mb-1">
+                <i data-lucide="shield-check" style="color: #10b981; width: 16px; height: 16px;"></i>
+                Privacy Assured Local Processing
+              </div>
+              <div class="text-secondary" style="font-size: 0.8rem;">
+                Resumes are parsed securely using local PyMuPDF extraction. Evidence spans are extracted directly from PDF text blocks.
+              </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label" style="font-weight: 600;">Upload PDF Resumes</label>
+              <label class="form-label" style="font-weight: 600; font-size: 0.88rem;">Upload PDF Resumes</label>
               <input type="file" name="resumes" class="form-control form-control-glass" accept=".pdf,.txt" multiple>
-              <div class="form-text text-muted" style="font-size: 0.78rem;">Upload one or multiple PDF / text resumes (max 16MB each).</div>
+              <div class="form-text text-muted" style="font-size: 0.76rem;">Upload one or multiple PDF / text resumes (max 16MB each).</div>
             </div>
 
             <div class="d-flex align-items-center my-3">
               <hr class="flex-grow-1 border-secondary">
-              <span class="px-3 text-muted" style="font-size: 0.8rem;">OR PASTE RESUME TEXT</span>
+              <span class="px-3 text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">OR PASTE RESUME TEXT</span>
               <hr class="flex-grow-1 border-secondary">
             </div>
 
             <div class="mb-2">
-              <label class="form-label" style="font-weight: 600;">Manual Resume Text</label>
+              <label class="form-label" style="font-weight: 600; font-size: 0.88rem;">Manual Resume Text</label>
               <textarea name="manual_text" class="form-control form-control-glass" rows="4" placeholder="Paste raw resume text here..."></textarea>
             </div>
           </div>
@@ -176,8 +189,8 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content modal-content-glass">
         <div class="modal-header modal-header-glass">
-          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700;">
-            <i data-lucide="check-square" class="text-success"></i>
+          <h5 class="modal-title d-flex align-items-center gap-2" style="font-weight: 700; font-size: 1.05rem;">
+            <i data-lucide="check-square" style="color: #10b981; width: 20px; height: 20px;"></i>
             Record Recruiter Decision
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -186,12 +199,12 @@
           <input type="hidden" id="decisionCandidateId">
           <div class="modal-body p-4">
             <div class="mb-3">
-              <label class="form-label text-muted" style="font-size: 0.85rem;">Candidate</label>
+              <label class="form-label text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Candidate</label>
               <div id="decisionCandidateNameModal" class="fw-bold fs-5 text-white"></div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label" style="font-weight: 600;">Decision Status</label>
+              <label class="form-label" style="font-weight: 600; font-size: 0.88rem;">Decision Status</label>
               <select id="decisionStatusSelect" class="form-select form-control-glass" required>
                 <option value="needs_review">Needs Review</option>
                 <option value="shortlisted">Shortlisted</option>
@@ -201,13 +214,13 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label" style="font-weight: 600;">Decision Rationale (Mandatory)</label>
+              <label class="form-label" style="font-weight: 600; font-size: 0.88rem;">Decision Rationale (Mandatory)</label>
               <textarea id="decisionReasonInput" class="form-control form-control-glass" rows="3" placeholder="Provide human evaluation context, trade-offs, and reasoning..." required></textarea>
-              <div class="form-text text-muted" style="font-size: 0.78rem;">Auditable explanation stored permanently with timestamp.</div>
+              <div class="form-text text-muted" style="font-size: 0.76rem;">Auditable explanation stored permanently with timestamp.</div>
             </div>
 
-            <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.78rem; color: #94A3B8;">
-              <i data-lucide="info" class="text-warning me-1" style="width: 14px; height: 14px;"></i>
+            <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.78rem; color: #a1a1aa;">
+              <i data-lucide="info" style="color: #f59e0b; width: 14px; height: 14px; vertical-align: -2px;" class="me-1"></i>
               <strong>Human-in-the-Loop:</strong> AI outputs advise; human recruiters make final determinations.
             </div>
           </div>

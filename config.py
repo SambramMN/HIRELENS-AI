@@ -40,5 +40,8 @@ class Config:
     
     # Blind screening default
     BLIND_SCREENING_DEFAULT = os.environ.get("BLIND_SCREENING_DEFAULT", "false").lower() in ("true", "1", "yes")
+    
+    # Auto reload templates
+    TEMPLATES_AUTO_RELOAD = True
 
 config = Config()

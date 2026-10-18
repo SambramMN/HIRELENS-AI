@@ -3,57 +3,57 @@
 {% block title %}Settings & System Configuration — HireLens AI{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div>
     <h1 class="h3 fw-bold text-white mb-1">System Settings & Engine Configuration</h1>
-    <p class="text-muted m-0" style="font-size: 0.9rem;">
+    <p class="text-muted m-0" style="font-size: 0.88rem;">
       Environment variables, persistence diagnostics, and benchmark reset controls.
     </p>
   </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-4 animate-in delay-1">
   <!-- AI / LLM Configuration Status -->
   <div class="col-lg-6">
     <div class="glass-card h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
-          <i data-lucide="cpu" class="text-success"></i>
+          <i data-lucide="cpu" style="width: 18px; height: 18px; color: #10b981;"></i>
           AI Specialist Engine
         </h2>
         {% if llm_configured %}
-          <span class="badge bg-success">LLM API CONNECTED</span>
+          <span class="badge-status badge-supported">LLM API Connected</span>
         {% else %}
-          <span class="badge bg-secondary">DETERMINISTIC FALLBACK ACTIVE</span>
+          <span class="candidate-code-tag">Deterministic Active</span>
         {% endif %}
       </div>
 
-      <p class="text-muted" style="font-size: 0.85rem;">
+      <p class="text-muted" style="font-size: 0.84rem; line-height: 1.5;">
         HireLens AI utilizes a modular multi-agent specialist architecture. When an OpenAI-compatible API key is present in <code>.env</code>, specialists call the configured model; otherwise, high-precision deterministic rules ground all evaluations without application interruption.
       </p>
 
-      <div class="p-3 rounded bg-dark border border-secondary mb-3">
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+      <div class="p-3 rounded mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">Configured Model:</span>
           <span class="text-white font-monospace">{{ config.OPENAI_MODEL }}</span>
         </div>
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">API Base URL:</span>
           <span class="text-white font-monospace">{{ config.OPENAI_BASE_URL }}</span>
         </div>
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">Request Timeout:</span>
           <span class="text-white font-monospace">{{ config.LLM_TIMEOUT_SECONDS }} seconds</span>
         </div>
-        <div class="d-flex justify-content-between py-1" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1" style="font-size: 0.82rem;">
           <span class="text-muted">Active Engine Mode:</span>
-          <span class="text-success font-monospace">{% if llm_configured %}Cloud LLM Structured JSON{% else %}Local Deterministic Regex & Taxonomy{% endif %}</span>
+          <span class="font-monospace" style="color: #34d399;">{% if llm_configured %}Cloud LLM Structured JSON{% else %}Local Deterministic Regex & Taxonomy{% endif %}</span>
         </div>
       </div>
 
-      <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.78rem; color: #94A3B8;">
-        <i data-lucide="shield-check" class="text-success me-1" style="width: 14px; height: 14px;"></i>
-        <strong>Security:</strong> API credentials are loaded solely via environment variables and are never echoed or written to client-accessible DOM nodes.
+      <div class="p-2 rounded d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.78rem; color: #a1a1aa;">
+        <i data-lucide="shield-check" style="color: #10b981; width: 15px; height: 15px; flex-shrink: 0;"></i>
+        <span><strong>Security:</strong> API credentials are loaded solely via environment variables and are never echoed or written to client-accessible DOM nodes.</span>
       </div>
     </div>
   </div>
@@ -62,32 +62,32 @@
   <div class="col-lg-6">
     <div class="glass-card h-100">
       <h2 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
-        <i data-lucide="hard-drive" class="text-success"></i>
+        <i data-lucide="hard-drive" style="width: 18px; height: 18px; color: #3b82f6;"></i>
         Persistence & File Storage
       </h2>
 
-      <div class="p-3 rounded bg-dark border border-secondary mb-3">
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+      <div class="p-3 rounded mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">Database Engine:</span>
           <span class="text-white font-monospace">SQLite3 (Foreign Keys Enabled)</span>
         </div>
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">Database Location:</span>
-          <span class="text-white font-monospace" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.DATABASE_PATH }}</span>
+          <span class="text-white font-monospace" style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.DATABASE_PATH }}</span>
         </div>
-        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1 border-bottom border-secondary" style="font-size: 0.82rem;">
           <span class="text-muted">PDF Upload Folder:</span>
-          <span class="text-white font-monospace" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.UPLOAD_FOLDER }}</span>
+          <span class="text-white font-monospace" style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ config.UPLOAD_FOLDER }}</span>
         </div>
-        <div class="d-flex justify-content-between py-1" style="font-size: 0.85rem;">
+        <div class="d-flex justify-content-between py-1" style="font-size: 0.82rem;">
           <span class="text-muted">Upload Limit:</span>
           <span class="text-white font-monospace">16 MB (PDF, TXT)</span>
         </div>
       </div>
 
-      <div class="p-3 rounded bg-dark border border-secondary mb-3">
-        <div class="fw-bold text-white fs-6 mb-1">Benchmark Demonstration Reset</div>
-        <p class="text-muted mb-2" style="font-size: 0.8rem;">
+      <div class="p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);">
+        <div class="fw-semibold text-white fs-6 mb-1">Benchmark Demonstration Reset</div>
+        <p class="text-muted mb-2" style="font-size: 0.8rem; line-height: 1.4;">
           Restore the initial Software Developer role, 3 synthetic benchmark candidates (Candidate A, B, C), and evidence groundings.
         </p>
         <button class="btn btn-outline-glass btn-sm text-warning" id="btnResetSystem">

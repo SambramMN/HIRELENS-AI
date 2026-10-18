@@ -3,10 +3,10 @@
 {% block title %}Activity Log — HireLens AI{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div>
     <h1 class="h3 fw-bold text-white mb-1">Audit Activity Log</h1>
-    <p class="text-muted m-0" style="font-size: 0.9rem;">
+    <p class="text-muted m-0" style="font-size: 0.88rem;">
       Tamper-evident, SQLite-backed audit trail of all recruitment decisions, uploads, and tests.
     </p>
   </div>
@@ -17,14 +17,14 @@
 </div>
 
 <!-- FILTER BAR -->
-<div class="glass-card mb-4 p-3">
+<div class="glass-card mb-4 p-3 animate-in delay-1">
   <form method="GET" action="/activity-log" class="row g-2 align-items-center">
     <div class="col-md-6">
       <div class="input-group">
-        <span class="input-group-text bg-dark border-secondary text-muted">
+        <span class="input-group-text bg-dark border-secondary text-muted" style="border-right: none;">
           <i data-lucide="search" style="width: 14px; height: 14px;"></i>
         </span>
-        <input type="text" name="q" value="{{ search }}" class="form-control form-control-glass" placeholder="Search event description or record ID...">
+        <input type="text" name="q" value="{{ search }}" class="form-control form-control-glass" style="border-left: none;" placeholder="Search event description or record ID...">
       </div>
     </div>
     <div class="col-md-4">
@@ -36,7 +36,7 @@
       </select>
     </div>
     <div class="col-md-2 d-flex gap-2">
-      <button type="submit" class="btn btn-mint w-100">Filter</button>
+      <button type="submit" class="btn btn-primary-solid w-100">Filter</button>
       {% if search or selected_event %}
         <a href="/activity-log" class="btn btn-outline-glass">Clear</a>
       {% endif %}
@@ -45,13 +45,13 @@
 </div>
 
 <!-- AUDIT LOG TABLE -->
-<div class="glass-card">
+<div class="glass-card animate-in delay-2">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
-      <i data-lucide="database" class="text-success"></i>
+      <i data-lucide="database" style="width: 18px; height: 18px; color: #10b981;"></i>
       Event Stream ({{ logs|length }} Events)
     </h2>
-    <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.75rem;">
+    <span class="candidate-code-tag">
       SQLite-Backed Audit Trail
     </span>
   </div>
@@ -70,28 +70,28 @@
         <tbody>
           {% for log in logs %}
             <tr>
-              <td class="text-muted font-monospace" style="font-size: 0.78rem;">
+              <td class="text-muted font-monospace" style="font-size: 0.76rem;">
                 {{ log.timestamp[:19] }}
               </td>
               <td>
                 {% if 'DECISION' in log.event_type %}
-                  <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.08); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); font-family: var(--font-mono); font-size: 0.7rem;">{{ log.event_type }}</span>
                 {% elif 'ERROR' in log.event_type %}
-                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                  <span class="badge" style="background: rgba(244, 63, 94, 0.08); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.25); font-family: var(--font-mono); font-size: 0.7rem;">{{ log.event_type }}</span>
                 {% elif 'AUDIT' in log.event_type or 'COUNTERFACTUAL' in log.event_type %}
-                  <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50 font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                  <span class="badge" style="background: rgba(59, 130, 246, 0.08); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); font-family: var(--font-mono); font-size: 0.7rem;">{{ log.event_type }}</span>
                 {% else %}
-                  <span class="badge bg-dark border border-secondary text-muted font-monospace" style="font-size: 0.72rem;">{{ log.event_type }}</span>
+                  <span class="candidate-code-tag" style="font-size: 0.7rem;">{{ log.event_type }}</span>
                 {% endif %}
               </td>
               <td>
                 {% if log.record_id %}
-                  <span class="badge bg-dark border border-secondary text-white font-monospace">{{ log.record_id }}</span>
+                  <span class="candidate-code-tag">{{ log.record_id }}</span>
                 {% else %}
                   <span class="text-muted">—</span>
                 {% endif %}
               </td>
-              <td class="text-white" style="font-size: 0.88rem;">
+              <td class="text-white" style="font-size: 0.85rem; line-height: 1.4;">
                 {{ log.description }}
               </td>
             </tr>
@@ -101,9 +101,9 @@
     </div>
   {% else %}
     <div class="text-center py-5 text-muted">
-      <i data-lucide="clipboard-list" style="width: 48px; height: 48px;" class="mb-3"></i>
-      <h3 class="h5 fw-bold text-white mb-2">No Matching Activity Found</h3>
-      <p class="text-muted">Perform recruiter actions, upload resumes, or clear your search filters.</p>
+      <i data-lucide="inbox" style="width: 44px; height: 44px; color: var(--text-dim);" class="mb-3"></i>
+      <h3 class="h5 fw-bold text-white mb-2">No Matching Activity Logs</h3>
+      <p class="text-muted mb-0" style="font-size: 0.88rem;">Adjust your filter or query string to view historical recruitment actions.</p>
     </div>
   {% endif %}
 </div>

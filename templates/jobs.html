@@ -3,26 +3,26 @@
 {% block title %}Job Intelligence — HireLens AI{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div>
     <h1 class="h3 fw-bold text-white mb-1">Job Description Intelligence</h1>
-    <p class="text-muted m-0" style="font-size: 0.9rem;">
+    <p class="text-muted m-0" style="font-size: 0.88rem;">
       Analyzed and structured requirements powered by the Job Analyst specialist.
     </p>
   </div>
-  <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#createJobModal">
-    <i data-lucide="plus-circle"></i>
+  <button class="btn btn-primary-solid" data-bs-toggle="modal" data-bs-target="#createJobModal">
+    <i data-lucide="plus"></i>
     New Job Description
   </button>
 </div>
 
 {% if active_job %}
-  <div class="glass-card mb-4">
+  <div class="glass-card mb-4 animate-in delay-1">
     <div class="d-flex justify-content-between align-items-start mb-3">
       <div>
-        <span class="badge bg-success mb-2">ACTIVE VACANCY</span>
+        <span class="badge-status badge-supported mb-2">Active Vacancy</span>
         <h2 class="h4 fw-bold text-white mb-1">{{ active_job.title }}</h2>
-        <div class="text-muted" style="font-size: 0.88rem;">
+        <div class="text-muted" style="font-size: 0.85rem;">
           <i data-lucide="building" style="width: 14px; height: 14px; vertical-align: -2px;"></i>
           Department: <span class="text-white">{{ active_job.department or 'Engineering' }}</span> &bull; 
           <i data-lucide="clock" style="width: 14px; height: 14px; vertical-align: -2px;"></i>
@@ -30,25 +30,25 @@
         </div>
       </div>
       <div class="text-end">
-        <span class="badge bg-dark border border-secondary text-muted">
-          Created: {{ active_job.created_at[:10] }}
+        <span class="candidate-code-tag">
+          Created {{ active_job.created_at[:10] }}
         </span>
       </div>
     </div>
 
-    <div class="p-3 rounded bg-dark border border-secondary mb-2" style="font-size: 0.85rem; color: #CBD5E1; max-height: 120px; overflow-y: auto; white-space: pre-line;">
+    <div class="p-3 rounded mb-2" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); font-size: 0.85rem; color: #d4d4d8; max-height: 120px; overflow-y: auto; white-space: pre-line; line-height: 1.5;">
       {{ active_job.description_raw }}
     </div>
   </div>
 
   <!-- REQUIREMENTS BREAKDOWN -->
-  <div class="glass-card">
+  <div class="glass-card animate-in delay-2">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <h3 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
-        <i data-lucide="check-circle-2" class="text-success"></i>
+        <i data-lucide="check-circle-2" style="width: 18px; height: 18px; color: #10b981;"></i>
         Structured Hiring Requirements ({{ requirements|length }})
       </h3>
-      <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.75rem;">
+      <span class="candidate-code-tag">
         Recruiter-Auditable Weights
       </span>
     </div>
@@ -62,42 +62,42 @@
             <th>Classification</th>
             <th>Weight</th>
             <th>Verification Criteria</th>
-            <th>Action</th>
+            <th class="text-end">Action</th>
           </tr>
         </thead>
         <tbody>
           {% for r in requirements %}
             <tr>
-              <td class="fw-bold text-white">{{ r.name }}</td>
+              <td class="fw-semibold text-white">{{ r.name }}</td>
               <td>
-                <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.75rem;">
+                <span class="candidate-code-tag" style="font-size: 0.7rem;">
                   {{ r.category }}
                 </span>
               </td>
               <td>
                 {% if r.classification == 'required' %}
-                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace">REQUIRED</span>
+                  <span class="badge" style="background: rgba(244, 63, 94, 0.1); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.25); font-size: 0.65rem;">REQUIRED</span>
                 {% else %}
-                  <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50 font-monospace">PREFERRED</span>
+                  <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid var(--border-subtle); font-size: 0.65rem;">PREFERRED</span>
                 {% endif %}
               </td>
               <td>
                 <div class="d-flex align-items-center gap-1">
                   {% for w in range(r.weight) %}
-                    <span style="color: #10B981; font-size: 1.1rem;">★</span>
+                    <span style="color: #10b981; font-size: 1rem;">★</span>
                   {% endfor %}
                   {% for w in range(5 - r.weight) %}
-                    <span style="color: #334155; font-size: 1.1rem;">★</span>
+                    <span style="color: #27272a; font-size: 1rem;">★</span>
                   {% endfor %}
-                  <span class="ms-1 text-muted" style="font-size: 0.8rem;">({{ r.weight }}/5)</span>
+                  <span class="ms-1 text-muted" style="font-size: 0.75rem;">({{ r.weight }}/5)</span>
                 </div>
               </td>
-              <td style="font-size: 0.85rem; color: #CBD5E1; max-width: 320px;">
+              <td style="font-size: 0.82rem; color: #d4d4d8; max-width: 320px; line-height: 1.4;">
                 {{ r.verification_criteria }}
               </td>
-              <td>
+              <td class="text-end">
                 <button class="btn btn-outline-glass btn-sm" onclick="openRequirementEditModal({{ r.id }}, '{{ r.name|replace('\'', '\\\'') }}', {{ r.weight }}, '{{ r.classification }}', '{{ r.verification_criteria|replace('\'', '\\\'') }}')">
-                  <i data-lucide="sliders" style="width: 14px; height: 14px;"></i>
+                  <i data-lucide="sliders" style="width: 13px; height: 13px;"></i>
                   Edit
                 </button>
               </td>
@@ -108,11 +108,11 @@
     </div>
   </div>
 {% else %}
-  <div class="glass-card text-center py-5">
-    <i data-lucide="briefcase" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+  <div class="glass-card text-center py-5 animate-in">
+    <i data-lucide="briefcase" style="width: 44px; height: 44px; color: var(--text-dim);" class="mb-3"></i>
     <h3 class="h5 fw-bold text-white mb-2">No Job Descriptions Created</h3>
-    <p class="text-muted mb-3">Create your first job description to extract structured requirements.</p>
-    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#createJobModal">
+    <p class="text-muted mb-3" style="font-size: 0.88rem;">Create your first job description to extract structured requirements.</p>
+    <button class="btn btn-primary-solid" data-bs-toggle="modal" data-bs-target="#createJobModal">
       Create Job
     </button>
   </div>
@@ -123,8 +123,8 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content modal-content-glass">
       <div class="modal-header modal-header-glass">
-        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
-          <i data-lucide="plus-circle" class="text-success"></i>
+        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+          <i data-lucide="plus-circle" style="color: #10b981; width: 20px; height: 20px;"></i>
           Create & Structure Job Description
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -133,36 +133,36 @@
         <div class="modal-body p-4">
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Job Title *</label>
+              <label class="form-label fw-semibold" style="font-size: 0.88rem;">Job Title *</label>
               <input type="text" id="jobTitleInput" class="form-control form-control-glass" placeholder="e.g. Senior Full Stack Engineer" required>
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Department</label>
+              <label class="form-label fw-semibold" style="font-size: 0.88rem;">Department</label>
               <input type="text" id="jobDeptInput" class="form-control form-control-glass" placeholder="e.g. Engineering">
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Experience Level</label>
+              <label class="form-label fw-semibold" style="font-size: 0.88rem;">Experience Level</label>
               <input type="text" id="jobExpInput" class="form-control form-control-glass" placeholder="e.g. 4+ years">
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Required Skills (Comma or newline separated)</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Required Skills (Comma or newline separated)</label>
             <input type="text" id="jobRequiredSkillsInput" class="form-control form-control-glass" placeholder="Python, FastAPI, React, PostgreSQL, Docker">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Preferred Skills (Bonus qualifications)</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Preferred Skills (Bonus qualifications)</label>
             <input type="text" id="jobPreferredSkillsInput" class="form-control form-control-glass" placeholder="Kubernetes, Redis, AWS, CI/CD">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Key Responsibilities</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Key Responsibilities</label>
             <textarea id="jobResponsibilitiesInput" class="form-control form-control-glass" rows="2" placeholder="Describe core day-to-day duties..."></textarea>
           </div>
 
           <div class="mb-2">
-            <label class="form-label fw-semibold">Full Job Description (Optional context)</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Full Job Description (Optional context)</label>
             <textarea id="jobDescInput" class="form-control form-control-glass" rows="4" placeholder="Paste full JD text here..."></textarea>
           </div>
         </div>
@@ -183,8 +183,8 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-content-glass">
       <div class="modal-header modal-header-glass">
-        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2">
-          <i data-lucide="sliders" class="text-success"></i>
+        <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2" style="font-size: 1.05rem;">
+          <i data-lucide="sliders" style="color: #10b981; width: 20px; height: 20px;"></i>
           Edit Requirement Configuration
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -192,20 +192,20 @@
       <div class="modal-body p-4">
         <input type="hidden" id="editReqId">
         <div class="mb-3">
-          <label class="form-label text-muted" style="font-size: 0.85rem;">Requirement Name</label>
+          <label class="form-label text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Requirement Name</label>
           <div id="editReqName" class="fw-bold text-white fs-5"></div>
         </div>
 
         <div class="row g-3 mb-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Classification</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Classification</label>
             <select id="editReqClass" class="form-select form-control-glass">
               <option value="required">Required</option>
               <option value="preferred">Preferred</option>
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Importance Weight (1-5)</label>
+            <label class="form-label fw-semibold" style="font-size: 0.88rem;">Importance Weight (1-5)</label>
             <select id="editReqWeight" class="form-select form-control-glass">
               <option value="5">5 - Critical Priority</option>
               <option value="4">4 - High Importance</option>
@@ -217,9 +217,9 @@
         </div>
 
         <div class="mb-2">
-          <label class="form-label fw-semibold">Verification Criteria</label>
+          <label class="form-label fw-semibold" style="font-size: 0.88rem;">Verification Criteria</label>
           <textarea id="editReqCriteria" class="form-control form-control-glass" rows="3"></textarea>
-          <div class="form-text text-muted" style="font-size: 0.78rem;">
+          <div class="form-text text-muted" style="font-size: 0.76rem;">
             Concrete standard used by the Matching Analyst to inspect resume evidence.
           </div>
         </div>

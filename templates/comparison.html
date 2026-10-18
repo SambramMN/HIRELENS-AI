@@ -3,10 +3,10 @@
 {% block title %}Candidate Comparison — HireLens AI{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div>
     <h1 class="h3 fw-bold text-white mb-1">Side-by-Side Candidate Comparison</h1>
-    <p class="text-muted m-0" style="font-size: 0.9rem;">
+    <p class="text-muted m-0" style="font-size: 0.88rem;">
       Evaluate qualifications, verification gaps, and evidence coverage side by side.
     </p>
   </div>
@@ -18,9 +18,9 @@
 
 {% if candidates|length >= 2 %}
   <!-- COMPARATIVE KPI TABLE -->
-  <div class="glass-card mb-4">
+  <div class="glass-card mb-4 animate-in delay-1">
     <h2 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
-      <i data-lucide="bar-chart-3" class="text-success"></i>
+      <i data-lucide="bar-chart-3" style="width: 18px; height: 18px; color: #10b981;"></i>
       Core Multi-Dimensional Metrics
     </h2>
 
@@ -31,12 +31,12 @@
             <th class="text-start" style="width: 25%;">Metric / Qualification</th>
             {% for c in candidates %}
               <th style="width: {{ (75 / candidates|length)|int }}%;">
-                <div class="fw-bold fs-6 text-white">
+                <div class="fw-semibold text-white fs-6">
                   {% if blind_mode %}
-                    <span class="badge bg-secondary font-monospace">{{ c.candidate_code }}</span>
+                    <span class="candidate-code-tag">{{ c.candidate_code }}</span>
                   {% else %}
                     {{ c.full_name }}
-                    <span class="badge bg-dark border border-secondary text-muted font-monospace" style="font-size: 0.65rem;">{{ c.candidate_code }}</span>
+                    <span class="candidate-code-tag ms-1" style="font-size: 0.68rem;">{{ c.candidate_code }}</span>
                   {% endif %}
                 </div>
               </th>
@@ -58,8 +58,8 @@
             <td class="text-start fw-semibold text-white">Required Skill Coverage</td>
             {% for c in candidates %}
               <td>
-                <div class="fw-bold text-success fs-5">{{ c.required_skill_coverage|int }}%</div>
-                <div class="progress mt-1 mx-auto" style="height: 4px; width: 80%; background: rgba(255,255,255,0.08);">
+                <div class="fw-bold fs-5" style="color: #34d399;">{{ c.required_skill_coverage|int }}%</div>
+                <div class="progress mt-1 mx-auto" style="height: 4px; width: 75%;">
                   <div class="progress-bar bg-success" style="width: {{ c.required_skill_coverage or 0 }}%;"></div>
                 </div>
               </td>
@@ -69,8 +69,8 @@
             <td class="text-start fw-semibold text-white">Evidence Coverage</td>
             {% for c in candidates %}
               <td>
-                <div class="fw-bold text-info fs-5">{{ c.evidence_coverage|int }}%</div>
-                <div class="progress mt-1 mx-auto" style="height: 4px; width: 80%; background: rgba(255,255,255,0.08);">
+                <div class="fw-bold fs-5" style="color: #60a5fa;">{{ c.evidence_coverage|int }}%</div>
+                <div class="progress mt-1 mx-auto" style="height: 4px; width: 75%;">
                   <div class="progress-bar bg-info" style="width: {{ c.evidence_coverage or 0 }}%;"></div>
                 </div>
               </td>
@@ -89,15 +89,15 @@
             {% for c in candidates %}
               <td>
                 {% if c.verification_uncertainty >= 40 %}
-                  <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50">
+                  <span class="badge-status badge-not-found">
                     {{ c.verification_uncertainty|int }}% High Gap
                   </span>
                 {% elif c.verification_uncertainty >= 20 %}
-                  <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">
+                  <span class="badge-status badge-partial">
                     {{ c.verification_uncertainty|int }}% Moderate
                   </span>
                 {% else %}
-                  <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">
+                  <span class="badge-status badge-supported">
                     {{ c.verification_uncertainty|int }}% Low Gap
                   </span>
                 {% endif %}
@@ -139,9 +139,9 @@
   </div>
 
   <!-- COMPARATIVE CHART -->
-  <div class="glass-card mb-4">
+  <div class="glass-card mb-4 animate-in delay-2">
     <h3 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
-      <i data-lucide="bar-chart-2" class="text-success"></i>
+      <i data-lucide="bar-chart-2" style="width: 16px; height: 16px; color: #10b981;"></i>
       Candidate Multi-Metric Comparison
     </h3>
     <div style="height: 280px;">
@@ -150,14 +150,14 @@
   </div>
 
   <!-- REQUIREMENT EVIDENCE MATRIX -->
-  <div class="glass-card">
+  <div class="glass-card animate-in delay-3">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <h3 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
-        <i data-lucide="grid" class="text-success"></i>
+        <i data-lucide="grid" style="width: 18px; height: 18px; color: #10b981;"></i>
         Requirement-by-Requirement Evidence Matrix
       </h3>
-      <span class="text-muted" style="font-size: 0.8rem;">
-        Green = Supported &bull; Amber = Partial &bull; Purple = Needs Verification &bull; Red = Not Found
+      <span class="text-muted" style="font-size: 0.78rem;">
+        Supported &bull; Partial &bull; Needs Verification &bull; Not Found
       </span>
     </div>
 
@@ -169,9 +169,9 @@
             {% for c in candidates %}
               <th class="text-center">
                 {% if blind_mode %}
-                  <span class="font-monospace">{{ c.candidate_code }}</span>
+                  <span class="candidate-code-tag">{{ c.candidate_code }}</span>
                 {% else %}
-                  {{ c.full_name }}
+                  <span class="fw-semibold text-white">{{ c.full_name }}</span>
                 {% endif %}
               </th>
             {% endfor %}
@@ -181,13 +181,13 @@
           {% for r in requirements %}
             <tr>
               <td>
-                <div class="fw-bold text-white">{{ r.name }}</div>
+                <div class="fw-semibold text-white">{{ r.name }}</div>
                 <div class="d-flex align-items-center gap-2 mt-1">
-                  <span class="badge bg-dark border border-secondary text-info font-monospace" style="font-size: 0.68rem;">{{ r.category }}</span>
+                  <span class="candidate-code-tag" style="font-size: 0.68rem;">{{ r.category }}</span>
                   {% if r.classification == 'required' %}
-                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-monospace" style="font-size: 0.65rem;">REQUIRED</span>
+                    <span class="badge" style="background: rgba(244, 63, 94, 0.1); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.25); font-size: 0.65rem;">REQUIRED</span>
                   {% else %}
-                    <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50 font-monospace" style="font-size: 0.65rem;">PREFERRED</span>
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px solid var(--border-subtle); font-size: 0.65rem;">PREFERRED</span>
                   {% endif %}
                 </div>
               </td>
@@ -224,11 +224,11 @@
     </div>
   </div>
 {% else %}
-  <div class="glass-card text-center py-5">
-    <i data-lucide="git-compare" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+  <div class="glass-card text-center py-5 animate-in">
+    <i data-lucide="git-compare" style="width: 44px; height: 44px; color: var(--text-dim);" class="mb-3"></i>
     <h3 class="h5 fw-bold text-white mb-2">Need at Least 2 Candidates to Compare</h3>
-    <p class="text-muted mb-3">Upload multiple resumes or reset to the pre-loaded synthetic candidates to enable side-by-side analysis.</p>
-    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+    <p class="text-muted mb-3" style="font-size: 0.88rem;">Upload multiple resumes or reset to the pre-loaded synthetic candidates to enable side-by-side analysis.</p>
+    <button class="btn btn-primary-solid" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
       Upload Resumes
     </button>
   </div>
@@ -249,19 +249,19 @@ document.addEventListener("DOMContentLoaded", () => {
           {
             label: 'Overall Match Score (%)',
             data: [{% for c in candidates %}{{ c.overall_score or 0 }},{% endfor %}],
-            backgroundColor: '#10B981',
+            backgroundColor: '#10b981',
             borderRadius: 6
           },
           {
             label: 'Required Skill Coverage (%)',
             data: [{% for c in candidates %}{{ c.required_skill_coverage or 0 }},{% endfor %}],
-            backgroundColor: '#06B6D4',
+            backgroundColor: '#3b82f6',
             borderRadius: 6
           },
           {
             label: 'Evidence Coverage (%)',
             data: [{% for c in candidates %}{{ c.evidence_coverage or 0 }},{% endfor %}],
-            backgroundColor: '#3B82F6',
+            backgroundColor: '#8b5cf6',
             borderRadius: 6
           }
         ]
@@ -274,17 +274,24 @@ document.addEventListener("DOMContentLoaded", () => {
             beginAtZero: true,
             max: 100,
             grid: { color: 'rgba(255, 255, 255, 0.06)' },
-            ticks: { color: '#94A3B8' }
+            ticks: { color: '#a1a1aa', font: { family: 'Inter', size: 11 } }
           },
           x: {
             grid: { display: false },
-            ticks: { color: '#CBD5E1', font: { weight: '600' } }
+            ticks: { color: '#f4f4f5', font: { family: 'Inter', weight: '600', size: 12 } }
           }
         },
         plugins: {
           legend: {
             position: 'top',
-            labels: { color: '#94A3B8', boxWidth: 14 }
+            labels: { 
+              color: '#a1a1aa', 
+              boxWidth: 8, 
+              boxHeight: 8,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              font: { family: 'Inter', size: 11 } 
+            }
           }
         }
       }

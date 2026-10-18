@@ -1,27 +1,71 @@
-// HireLens AI — Client Side Orchestration
+// HireLens AI — Client Side Orchestration & UI Interactions
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Initialize Lucide Icons if available
+    // 1. Initialize Lucide Icons
     if (window.lucide) {
         window.lucide.createIcons();
     }
 
-    // 2. Global Toast Notification Helper
+    // 2. Initialize Lenis Smooth Scroll (darkroomengineering/lenis)
+    if (typeof Lenis !== "undefined") {
+        try {
+            const lenis = new Lenis({
+                duration: 1.1,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                orientation: 'vertical',
+                gestureOrientation: 'vertical',
+                smoothWheel: true,
+                wheelMultiplier: 1.0,
+                touchMultiplier: 2.0
+            });
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+        } catch (e) {
+            console.debug("Lenis initialization skipped", e);
+        }
+    }
+
+    // 3. Inspira UI Interactive Spotlight Effect (Mouse tracking on cards)
+    const initSpotlight = () => {
+        document.querySelectorAll('.glass-card').forEach(card => {
+            if (card.dataset.spotlightInit) return;
+            card.dataset.spotlightInit = "true";
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    };
+    initSpotlight();
+
+    // 4. Global Toast Notification Helper (21st.dev minimal design)
     window.showToast = function (message, type = "success") {
         const container = document.getElementById("toastContainer");
         if (!container) return;
 
         const toast = document.createElement("div");
-        toast.className = `glass-card glass-card-sm d-flex align-items-center gap-3`;
-        toast.style.minWidth = "280px";
-        toast.style.borderLeft = type === "success" ? "4px solid #10B981" : "4px solid #EF4444";
-        toast.style.animation = "fadeIn 0.3s ease";
+        toast.className = `glass-card glass-card-sm d-flex align-items-center gap-3 animate-in`;
+        toast.style.minWidth = "300px";
+        toast.style.padding = "0.75rem 1rem";
+        toast.style.borderRadius = "10px";
+        toast.style.background = "#141418";
+        toast.style.border = "1px solid rgba(255, 255, 255, 0.12)";
+        toast.style.boxShadow = "0 10px 30px -5px rgba(0,0,0,0.8)";
 
-        const iconColor = type === "success" ? "#10B981" : "#EF4444";
+        const isSuccess = type === "success";
+        const dotColor = isSuccess ? "#10b981" : "#f43f5e";
+        const iconName = isSuccess ? "check-circle-2" : "alert-circle";
+
         toast.innerHTML = `
-            <div style="color: ${iconColor};">
-                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i>
+            <div style="color: ${dotColor}; flex-shrink: 0;">
+                <i data-lucide="${iconName}" style="width: 18px; height: 18px;"></i>
             </div>
-            <div class="flex-grow-1" style="font-size: 0.88rem; color: #FFFFFF;">
+            <div class="flex-grow-1" style="font-size: 0.85rem; color: #f4f4f5; line-height: 1.35;">
                 ${message}
             </div>
         `;
@@ -31,12 +75,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
             toast.style.opacity = "0";
-            toast.style.transition = "opacity 0.4s ease";
-            setTimeout(() => toast.remove(), 400);
-        }, 3500);
+            toast.style.transform = "translateY(10px)";
+            toast.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            setTimeout(() => toast.remove(), 320);
+        }, 3600);
     };
 
-    // 3. Blind Screening Toggle Handler
+    // 5. Blind Screening Toggle Handler
     const blindToggle = document.getElementById("blindScreeningToggle");
     if (blindToggle) {
         blindToggle.addEventListener("change", async (e) => {
@@ -49,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(enabled ? "Blind Screening Activated: Personal Identifiers Masked" : "Blind Screening Deactivated: Full Profile Visible");
+                    showToast(enabled ? "Blind Screening Active: Personal Identifiers Masked" : "Blind Screening Inactive: Full Profile Visible");
                     setTimeout(() => window.location.reload(), 400);
                 }
             } catch (err) {
@@ -58,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 4. Job Creation Form
+    // 6. Job Creation Form
     const jobForm = document.getElementById("createJobForm");
     if (jobForm) {
         jobForm.addEventListener("submit", async (e) => {
@@ -101,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 5. Resume Upload Form
+    // 7. Resume Upload Form
     const uploadForm = document.getElementById("uploadResumeForm");
     if (uploadForm) {
         uploadForm.addEventListener("submit", async (e) => {
@@ -134,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 6. Recruiter Decision Modal & Submission
+    // 8. Recruiter Decision Modal & Submission
     const decisionForm = document.getElementById("recruiterDecisionForm");
     if (decisionForm) {
         decisionForm.addEventListener("submit", async (e) => {
@@ -162,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 7. Interactive Counterfactual Test Runner
+    // 9. Interactive Counterfactual Test Runner
     const runCounterfactualBtn = document.getElementById("btnRunCounterfactual");
     if (runCounterfactualBtn) {
         runCounterfactualBtn.addEventListener("click", async () => {
@@ -205,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 8. Clipboard Copy Helper
+    // 10. Clipboard Copy Helper
     window.copyToClipboard = function (text, message = "Copied to clipboard!") {
         navigator.clipboard.writeText(text).then(() => {
             showToast(message);
@@ -214,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // 9. Reset Demo System
+    // 11. Reset Demo System
     const resetBtn = document.getElementById("btnResetSystem");
     if (resetBtn) {
         resetBtn.addEventListener("click", async () => {

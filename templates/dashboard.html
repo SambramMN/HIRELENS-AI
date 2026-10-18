@@ -3,95 +3,107 @@
 {% block title %}Dashboard — HireLens AI Recruitment Intelligence{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between mb-4 animate-in">
   <div>
     <h1 class="h3 fw-bold text-white mb-1">Recruitment Intelligence Overview</h1>
-    <p class="text-muted m-0" style="font-size: 0.9rem;">
+    <p class="text-muted m-0" style="font-size: 0.88rem;">
       Active Role: <span class="text-white fw-semibold">{{ active_job.title if active_job else 'No Active Job Configured' }}</span> 
-      {% if active_job %}&bull; <span class="text-success">{{ requirements_count }} Structured Requirements</span>{% endif %}
+      {% if active_job %}&bull; <span class="candidate-code-tag" style="color: #34d399; border-color: rgba(16,185,129,0.3);">{{ requirements_count }} Structured Requirements</span>{% endif %}
     </p>
   </div>
   <div class="d-flex gap-2">
     <a href="/jobs" class="btn btn-outline-glass">
-      <i data-lucide="edit-3"></i>
+      <i data-lucide="sliders"></i>
       Configure Job
     </a>
-    <button class="btn btn-mint" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
-      <i data-lucide="user-plus"></i>
+    <button class="btn btn-primary-solid" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+      <i data-lucide="plus"></i>
       Screen Resumes
     </button>
   </div>
 </div>
 
-<!-- MULTI-AGENT WORKFLOW PIPELINE -->
-<div class="workflow-pipeline">
+<!-- MULTI-AGENT WORKFLOW PIPELINE (21st.dev Connected Rail) -->
+<div class="workflow-pipeline animate-in delay-1">
   <div class="pipeline-step step-completed">
     <i data-lucide="file-text"></i>
     <div>
-      <div class="fw-bold">Job Analyst</div>
-      <div style="font-size: 0.72rem; color: #94A3B8;">Schema Validated</div>
+      <div class="fw-semibold text-white">Job Analyst</div>
+      <div style="font-size: 0.7rem; color: var(--text-muted);">Schema Validated</div>
     </div>
   </div>
   <i data-lucide="chevron-right" class="pipeline-arrow"></i>
   <div class="pipeline-step step-completed">
     <i data-lucide="scan"></i>
     <div>
-      <div class="fw-bold">Resume Analyst</div>
-      <div style="font-size: 0.72rem; color: #94A3B8;">PyMuPDF Extraction</div>
+      <div class="fw-semibold text-white">Resume Analyst</div>
+      <div style="font-size: 0.7rem; color: var(--text-muted);">PyMuPDF Extraction</div>
     </div>
   </div>
   <i data-lucide="chevron-right" class="pipeline-arrow"></i>
   <div class="pipeline-step step-completed">
     <i data-lucide="target"></i>
     <div>
-      <div class="fw-bold">Matching Analyst</div>
-      <div style="font-size: 0.72rem; color: #94A3B8;">Evidence Grounding</div>
+      <div class="fw-semibold text-white">Matching Analyst</div>
+      <div style="font-size: 0.7rem; color: var(--text-muted);">Evidence Grounding</div>
     </div>
   </div>
   <i data-lucide="chevron-right" class="pipeline-arrow"></i>
   <div class="pipeline-step step-completed">
     <i data-lucide="help-circle"></i>
     <div>
-      <div class="fw-bold">Interview Planner</div>
-      <div style="font-size: 0.72rem; color: #94A3B8;">Adaptive Questions</div>
+      <div class="fw-semibold text-white">Interview Planner</div>
+      <div style="font-size: 0.7rem; color: var(--text-muted);">Adaptive Questions</div>
     </div>
   </div>
   <i data-lucide="chevron-right" class="pipeline-arrow"></i>
-  <div class="pipeline-step" style="border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.1);">
-    <i data-lucide="user-check" class="text-primary"></i>
+  <div class="pipeline-step step-active">
+    <i data-lucide="user-check"></i>
     <div>
-      <div class="fw-bold text-white">Recruiter Review</div>
-      <div style="font-size: 0.72rem; color: #93C5FD;">Final Decision</div>
+      <div class="fw-semibold text-white">Recruiter Review</div>
+      <div style="font-size: 0.7rem; color: #93c5fd;">Human Decision</div>
     </div>
   </div>
 </div>
 
-<!-- KEY METRIC CARDS -->
-<div class="row g-3 mb-4">
+<!-- KEY METRIC CARDS (Bento Grid) -->
+<div class="row g-3 mb-4 animate-in delay-2">
   <div class="col-md-3">
     <div class="glass-card stat-card">
-      <div class="stat-label">Screened Candidates</div>
+      <div class="stat-label">
+        <span>Screened Candidates</span>
+        <i data-lucide="users" style="width: 15px; height: 15px; color: var(--text-muted);"></i>
+      </div>
       <div class="stat-value">{{ candidates|length }}</div>
       <div class="stat-meta">Across {{ requirements_count }} verified criteria</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="glass-card stat-card" style="border-left-color: #3B82F6;">
-      <div class="stat-label">Average Match Score</div>
+    <div class="glass-card stat-card">
+      <div class="stat-label">
+        <span>Average Match Score</span>
+        <i data-lucide="gauge" style="width: 15px; height: 15px; color: #3b82f6;"></i>
+      </div>
       <div class="stat-value">{{ metrics.average_score }}%</div>
       <div class="stat-meta">Weighted by required skills</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="glass-card stat-card" style="border-left-color: #F59E0B;">
-      <div class="stat-label">Unverified Gap Rate</div>
+    <div class="glass-card stat-card">
+      <div class="stat-label">
+        <span>Unverified Gap Rate</span>
+        <i data-lucide="alert-circle" style="width: 15px; height: 15px; color: #f59e0b;"></i>
+      </div>
       <div class="stat-value">{{ metrics.missing_evidence_rate }}%</div>
       <div class="stat-meta">Requires interview verification</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="glass-card stat-card" style="border-left-color: #10B981;">
-      <div class="stat-label">Shortlisted Candidates</div>
+    <div class="glass-card stat-card">
+      <div class="stat-label">
+        <span>Shortlisted Candidates</span>
+        <i data-lucide="award" style="width: 15px; height: 15px; color: #10b981;"></i>
+      </div>
       <div class="stat-value">{{ status_map.get('shortlisted', 0) }}</div>
       <div class="stat-meta">{{ status_map.get('interview_planned', 0) }} interview planned</div>
     </div>
@@ -99,16 +111,16 @@
 </div>
 
 <!-- MAIN WORKBENCH -->
-<div class="row g-4 mb-4">
+<div class="row g-4 mb-4 animate-in delay-3">
   <!-- Candidate Leaderboard -->
   <div class="col-lg-8">
     <div class="glass-card h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h2 class="h5 fw-bold text-white m-0 d-flex align-items-center gap-2">
-          <i data-lucide="users" class="text-success"></i>
+          <i data-lucide="layers" style="width: 18px; height: 18px; color: #10b981;"></i>
           Candidate Evidence Leaderboard
         </h2>
-        <a href="/candidates" class="text-decoration-none text-success" style="font-size: 0.85rem;">
+        <a href="/candidates" class="text-decoration-none text-muted" style="font-size: 0.82rem; font-weight: 500;">
           View Full Table &rarr;
         </a>
       </div>
@@ -123,26 +135,28 @@
                 <th>Required Skills</th>
                 <th>Evidence Coverage</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th class="text-end">Action</th>
               </tr>
             </thead>
             <tbody>
               {% for c in candidates %}
                 <tr>
                   <td>
-                    <div class="fw-bold text-white">
-                      {% if blind_mode %}
-                        <span class="badge bg-secondary font-monospace">{{ c.candidate_code }}</span>
-                      {% else %}
-                        {{ c.full_name }}
-                        <span class="badge bg-dark border border-secondary text-muted font-monospace ms-1" style="font-size: 0.7rem;">{{ c.candidate_code }}</span>
-                      {% endif %}
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="fw-semibold text-white" style="font-size: 0.92rem;">
+                        {% if blind_mode %}
+                          <span class="candidate-code-tag">{{ c.candidate_code }}</span>
+                        {% else %}
+                          {{ c.full_name }}
+                          <span class="candidate-code-tag ms-1">{{ c.candidate_code }}</span>
+                        {% endif %}
+                      </div>
                     </div>
-                    <div class="text-muted" style="font-size: 0.78rem;">
+                    <div class="text-muted" style="font-size: 0.78rem; margin-top: 3px;">
                       {% if blind_mode %}
-                        [Demographics Masked]
+                        Demographics Masked
                       {% else %}
-                        {{ c.location or 'Location not stated' }}
+                        {{ c.location or 'Location not specified' }}
                       {% endif %}
                     </div>
                   </td>
@@ -152,19 +166,19 @@
                     </div>
                   </td>
                   <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.08);">
+                    <div class="d-flex align-items-center gap-2" style="min-width: 120px;">
+                      <div class="progress flex-grow-1" style="height: 4px;">
                         <div class="progress-bar bg-success" style="width: {{ c.required_skill_coverage or 0 }}%;"></div>
                       </div>
-                      <span style="font-size: 0.8rem;" class="fw-semibold">{{ c.required_skill_coverage|int }}%</span>
+                      <span style="font-size: 0.78rem; color: var(--text-secondary); width: 34px;" class="font-monospace text-end">{{ c.required_skill_coverage|int }}%</span>
                     </div>
                   </td>
                   <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.08);">
+                    <div class="d-flex align-items-center gap-2" style="min-width: 120px;">
+                      <div class="progress flex-grow-1" style="height: 4px;">
                         <div class="progress-bar bg-info" style="width: {{ c.evidence_coverage or 0 }}%;"></div>
                       </div>
-                      <span style="font-size: 0.8rem;" class="fw-semibold">{{ c.evidence_coverage|int }}%</span>
+                      <span style="font-size: 0.78rem; color: var(--text-secondary); width: 34px;" class="font-monospace text-end">{{ c.evidence_coverage|int }}%</span>
                     </div>
                   </td>
                   <td>
@@ -178,7 +192,7 @@
                       <span class="badge-status badge-needs-review">Needs Review</span>
                     {% endif %}
                   </td>
-                  <td>
+                  <td class="text-end">
                     <a href="/candidates/{{ c.id }}" class="btn btn-outline-glass btn-sm">
                       Inspect
                     </a>
@@ -190,8 +204,8 @@
         </div>
       {% else %}
         <div class="text-center py-5 text-muted">
-          <i data-lucide="inbox" style="width: 48px; height: 48px;" class="mb-2"></i>
-          <p>No candidates screened yet. Upload PDF resumes or use demonstration candidates.</p>
+          <i data-lucide="inbox" style="width: 42px; height: 42px; color: var(--text-dim);" class="mb-2"></i>
+          <p class="m-0" style="font-size: 0.88rem;">No candidates screened yet. Upload PDF resumes or use demonstration candidates.</p>
         </div>
       {% endif %}
     </div>
@@ -201,10 +215,10 @@
   <div class="col-lg-4">
     <div class="glass-card mb-4">
       <h3 class="h6 fw-bold text-white mb-3 d-flex align-items-center gap-2">
-        <i data-lucide="filter" class="text-success"></i>
+        <i data-lucide="pie-chart" style="width: 16px; height: 16px; color: #10b981;"></i>
         Screening Status Distribution
       </h3>
-      <div style="height: 200px;">
+      <div style="height: 190px;">
         <canvas id="statusChart"></canvas>
       </div>
     </div>
@@ -212,19 +226,19 @@
     <div class="glass-card">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h3 class="h6 fw-bold text-white m-0 d-flex align-items-center gap-2">
-          <i data-lucide="activity" class="text-success"></i>
+          <i data-lucide="activity" style="width: 16px; height: 16px; color: #3b82f6;"></i>
           Audit Activity Stream
         </h3>
-        <a href="/activity-log" class="text-decoration-none text-success" style="font-size: 0.8rem;">View All</a>
+        <a href="/activity-log" class="text-decoration-none text-muted" style="font-size: 0.78rem;">View All</a>
       </div>
-      <div class="d-flex flex-direction-column gap-2" style="max-height: 240px; overflow-y: auto;">
+      <div class="d-flex flex-column gap-2" style="max-height: 240px; overflow-y: auto;">
         {% for log in recent_logs %}
           <div class="p-2 rounded bg-dark border border-secondary" style="font-size: 0.8rem;">
-            <div class="d-flex justify-content-between text-muted" style="font-size: 0.72rem;">
-              <span class="badge bg-secondary font-monospace" style="font-size: 0.65rem;">{{ log.event_type }}</span>
-              <span>{{ log.timestamp[:19] }}</span>
+            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem;">
+              <span class="candidate-code-tag" style="font-size: 0.65rem;">{{ log.event_type }}</span>
+              <span class="font-monospace text-dim">{{ log.timestamp[11:19] }}</span>
             </div>
-            <div class="text-white mt-1">{{ log.description }}</div>
+            <div class="text-white mt-1" style="font-size: 0.82rem; line-height: 1.35;">{{ log.description }}</div>
           </div>
         {% endfor %}
       </div>
@@ -249,9 +263,10 @@ document.addEventListener("DOMContentLoaded", () => {
             {{ status_map.get('needs_review', 0) }},
             {{ status_map.get('not_proceeding', 0) }}
           ],
-          backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444'],
-          borderColor: '#0F172A',
-          borderWidth: 2
+          backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e'],
+          borderColor: '#111114',
+          borderWidth: 3,
+          hoverOffset: 4
         }]
       },
       options: {
@@ -260,9 +275,17 @@ document.addEventListener("DOMContentLoaded", () => {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { color: '#94A3B8', boxWidth: 12, font: { size: 11 } }
+            labels: { 
+              color: '#a1a1aa', 
+              boxWidth: 8, 
+              boxHeight: 8,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              font: { size: 11, family: 'Inter' } 
+            }
           }
-        }
+        },
+        cutout: '72%'
       }
     });
   }
