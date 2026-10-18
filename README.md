@@ -7,7 +7,10 @@ Built for the **Azentio Software Talent Acquisition Intern – AI & LLM** Techni
 [![Flask](https://img.shields.io/badge/Framework-Flask%203.1-black.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-8%2F8%20Passing-brightgreen.svg)](#testing)
-[![Vercel Ready](https://img.shields.io/badge/Deployment-Vercel%20Serverless-black.svg)](https://vercel.com/)
+[![Live Demo](https://img.shields.io/badge/Production%20URL-hirelens--ai--liart.vercel.app-10B981.svg)](https://hirelens-ai-liart.vercel.app)
+
+**Live Production URL:** [https://hirelens-ai-liart.vercel.app](https://hirelens-ai-liart.vercel.app)  
+**GitHub Repository:** [https://github.com/SambramMN/HIRELENS-AI.git](https://github.com/SambramMN/HIRELENS-AI.git)
 
 ---
 
